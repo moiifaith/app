@@ -1,0 +1,6 @@
+{
+  "appId": "faith.moii",
+  "appName": "moii.faith",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

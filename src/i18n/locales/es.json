@@ -1,0 +1,37 @@
+{
+  "welcome": "Bienvenido a Moii.Faith",
+  "homeDescription": "Una aplicación moderna de Vue.js con soporte multilingüe y capacidades móviles.",
+  "feature1Title": "Framework Moderno",
+  "feature1Description": "Construido con Vue 3, la versión más reciente y poderosa del framework Vue.js.",
+  "feature2Title": "Listo para Móviles",
+  "feature2Description": "Potenciado por Capacitor para un despliegue fluido en iOS y Android.",
+  "feature3Title": "Multilingüe",
+  "feature3Description": "Soporte completo de internacionalización con cambio fácil de idioma.",
+  "aboutTitle": "Acerca de Nosotros",
+  "aboutDescription": "Aprende más sobre nuestra misión, visión y valores.",
+  "missionTitle": "Nuestra Misión",
+  "missionDescription": "Crear soluciones digitales innovadoras que conecten personas y empoderen comunidades en todo el mundo.",
+  "visionTitle": "Nuestra Visión",
+  "visionDescription": "Un mundo donde la tecnología une diferencias y crea oportunidades para todos.",
+  "contactTitle": "Contáctanos",
+  "contactDescription": "Ponte en contacto con nuestro equipo para asociaciones, soporte o consultas generales.",
+  "profileTitle": "Perfil de Usuario",
+  "userName": "Juan Pérez",
+  "userEmail": "juan.perez@ejemplo.com",
+  "avatarPlaceholder": "JP",
+  "projectsCount": "Proyectos",
+  "rating": "Calificación",
+  "connectionsCount": "Conexiones",
+  "editProfile": "Editar Perfil",
+  "navigation": {
+    "home": "Inicio",
+    "about": "Acerca",
+    "profile": "Perfil"
+  },
+  "language": {
+    "current": "Idioma",
+    "english": "Inglés",
+    "spanish": "Español",
+    "french": "Francés"
+  }
+}

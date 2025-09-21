@@ -1,0 +1,37 @@
+{
+  "welcome": "Bienvenue sur Moii.Faith",
+  "homeDescription": "Une application Vue.js moderne avec support multilingue et capacités mobiles.",
+  "feature1Title": "Framework Moderne",
+  "feature1Description": "Construit avec Vue 3, la version la plus récente et puissante du framework Vue.js.",
+  "feature2Title": "Prêt pour Mobile",
+  "feature2Description": "Alimenté par Capacitor pour un déploiement fluide sur iOS et Android.",
+  "feature3Title": "Multilingue",
+  "feature3Description": "Support complet d'internationalisation avec changement facile de langue.",
+  "aboutTitle": "À Propos de Nous",
+  "aboutDescription": "Apprenez-en plus sur notre mission, vision et valeurs.",
+  "missionTitle": "Notre Mission",
+  "missionDescription": "Créer des solutions numériques innovantes qui connectent les gens et autonomisent les communautés dans le monde entier.",
+  "visionTitle": "Notre Vision",
+  "visionDescription": "Un monde où la technologie comble les écarts et crée des opportunités pour tous.",
+  "contactTitle": "Nous Contacter",
+  "contactDescription": "Contactez notre équipe pour des partenariats, du support ou des demandes générales.",
+  "profileTitle": "Profil Utilisateur",
+  "userName": "Jean Dupont",
+  "userEmail": "jean.dupont@exemple.com",
+  "avatarPlaceholder": "JD",
+  "projectsCount": "Projets",
+  "rating": "Évaluation",
+  "connectionsCount": "Connexions",
+  "editProfile": "Modifier le Profil",
+  "navigation": {
+    "home": "Accueil",
+    "about": "À Propos",
+    "profile": "Profil"
+  },
+  "language": {
+    "current": "Langue",
+    "english": "Anglais",
+    "spanish": "Espagnol",
+    "french": "Français"
+  }
+}
