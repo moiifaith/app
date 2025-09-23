@@ -51,20 +51,20 @@ export function useAuth() {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        token.value = data.token
-        user.value = data.user
+        token.value = data.data.token
+        user.value = data.data.user
         isAuthenticated.value = true
 
         // Store token securely
         await Preferences.set({
           key: 'auth_token',
-          value: data.token
+          value: data.data.token
         })
 
         // Store user data
         await Preferences.set({
           key: 'user_data',
-          value: JSON.stringify(data.user)
+          value: JSON.stringify(data.data.user)
         })
 
         return { success: true }
