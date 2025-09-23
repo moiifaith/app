@@ -44,13 +44,35 @@
         </div>
 
         <div class="form-group">
-          <label for="name">{{ $t('auth.name') }}</label>
+          <label for="username">{{ $t('auth.username') || 'Username' }}</label>
           <input
             type="text"
-            id="name"
-            v-model="form.name"
-            :placeholder="$t('auth.namePlaceholder')"
+            id="username"
+            v-model="form.username"
+            :placeholder="$t('auth.usernamePlaceholder') || 'Enter your username'"
             required
+            :disabled="loading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="firstName">{{ $t('auth.firstName') || 'First Name' }}</label>
+          <input
+            type="text"
+            id="firstName"
+            v-model="form.firstName"
+            :placeholder="$t('auth.firstNamePlaceholder') || 'Enter your first name'"
+            :disabled="loading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">{{ $t('auth.lastName') || 'Last Name' }}</label>
+          <input
+            type="text"
+            id="lastName"
+            v-model="form.lastName"
+            :placeholder="$t('auth.lastNamePlaceholder') || 'Enter your last name'"
             :disabled="loading"
           />
         </div>
@@ -103,9 +125,11 @@ export default {
 
     const form = reactive({
       email: '',
+      username: '',
       password: '',
       confirmPassword: '',
-      name: '',
+      firstName: '',
+      lastName: '',
       migrateData: true
     })
 
@@ -126,8 +150,10 @@ export default {
       try {
         const result = await register({
           email: form.email,
+          username: form.username,
           password: form.password,
-          name: form.name
+          firstName: form.firstName,
+          lastName: form.lastName
         })
 
         if (result.success) {
