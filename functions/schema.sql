@@ -1,65 +1,125 @@
--- Cloudflare D1 Database Schema for Zikr App
+-- Cloudflare D1 Database Schema for Zikr App v2.0
 
--- Users table (for future user management)
+-- Users table with authentication and roles
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  email TEXT UNIQUE,
-  username TEXT UNIQUE,
+  email TEXT UNIQUE NOT NULL,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  first_name TEXT,
+  last_name TEXT,
+  role TEXT DEFAULT 'user' CHECK (role IN ('admin', 'user')),
+  is_active BOOLEAN DEFAULT 1,
+  email_verified BOOLEAN DEFAULT 0,
+  email_verification_token TEXT,
+  password_reset_token TEXT,
+  password_reset_expires DATETIME,
+  last_login DATETIME,
+  login_attempts INTEGER DEFAULT 0,
+  locked_until DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  last_active DATETIME DEFAULT CURRENT_TIMESTAMP,
-  preferences TEXT -- JSON string for user preferences
-);
-
--- Zikrs table
-CREATE TABLE IF NOT EXISTS zikrs (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  arabic TEXT NOT NULL,
-  latin TEXT NOT NULL,
-  identifier TEXT UNIQUE NOT NULL,
-  default_repetitions INTEGER DEFAULT 33,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  is_active BOOLEAN DEFAULT 1
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Languages table for supported languages
 CREATE TABLE IF NOT EXISTS languages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  code TEXT UNIQUE NOT NULL, -- ISO 639-1 language code (e.g., 'en', 'ar', 'es')
+  code TEXT UNIQUE NOT NULL, -- ISO 639-1 language code (e.g., 'en', 'ar', 'bs')
   name TEXT NOT NULL, -- Language name in English
   native_name TEXT NOT NULL, -- Language name in its native script
   rtl BOOLEAN DEFAULT 0, -- Right-to-left language
   is_active BOOLEAN DEFAULT 1,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- Admin users
-CREATE TABLE IF NOT EXISTS admin_users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  role TEXT DEFAULT 'admin',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  last_login DATETIME
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Translations (backup storage, primary storage is in KV)
-CREATE TABLE IF NOT EXISTS translations (
+-- Zikrs table (both default and user-created)
+CREATE TABLE IF NOT EXISTS zikrs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER, -- NULL for default zikrs, user_id for custom zikrs
+  arabic TEXT NOT NULL,
+  latin TEXT NOT NULL,
+  identifier TEXT NOT NULL,
+  default_repetitions INTEGER DEFAULT 33,
+  description TEXT,
+  is_custom BOOLEAN DEFAULT 0, -- 0 for default, 1 for user-created
+  is_active BOOLEAN DEFAULT 1,
+  is_public BOOLEAN DEFAULT 0, -- Allow other users to see custom zikrs
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- User progress tracking (for logged-in users)
+CREATE TABLE IF NOT EXISTS user_progress (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  zikr_id INTEGER NOT NULL,
+  date TEXT NOT NULL, -- YYYY-MM-DD format
+  count INTEGER NOT NULL DEFAULT 0,
+  target_count INTEGER NOT NULL,
+  completed BOOLEAN DEFAULT 0,
+  time_spent_seconds INTEGER DEFAULT 0, -- Time spent on this zikr
+  notes TEXT, -- Optional user notes
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (zikr_id) REFERENCES zikrs(id) ON DELETE CASCADE,
+  UNIQUE(user_id, zikr_id, date)
+);
+
+-- User sessions tracking (detailed session data)
+CREATE TABLE IF NOT EXISTS user_sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  zikr_id INTEGER NOT NULL,
+  start_time DATETIME NOT NULL,
+  end_time DATETIME,
+  count_achieved INTEGER DEFAULT 0,
+  target_count INTEGER NOT NULL,
+  completed BOOLEAN DEFAULT 0,
+  interrupted BOOLEAN DEFAULT 0, -- If session was interrupted
+  device_info TEXT, -- JSON string with device/browser info
+  session_notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (zikr_id) REFERENCES zikrs(id) ON DELETE CASCADE
+);
+
+-- Translation cache versioning (to track when translations change)
+CREATE TABLE IF NOT EXISTS translation_versions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   language_code TEXT NOT NULL,
-  translation_key TEXT NOT NULL,
-  translation_value TEXT NOT NULL,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(language_code, translation_key),
-  FOREIGN KEY (language_code) REFERENCES languages(code)
+  version_hash TEXT NOT NULL, -- Hash of the translation content
+  last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(language_code)
 );
 
--- Insert supported languages
+-- User preferences and settings
+CREATE TABLE IF NOT EXISTS user_preferences (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  preferred_language TEXT DEFAULT 'en',
+  theme TEXT DEFAULT 'light' CHECK (theme IN ('light', 'dark', 'auto')),
+  notification_settings TEXT, -- JSON string
+  privacy_settings TEXT, -- JSON string
+  app_settings TEXT, -- JSON string for app-specific settings
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (preferred_language) REFERENCES languages(code),
+  UNIQUE(user_id)
+);
+
+-- Insert supported languages (including new Balkan languages)
 INSERT OR IGNORE INTO languages (code, name, native_name, rtl) VALUES
 ('en', 'English', 'English', 0),
 ('ar', 'Arabic', 'العربية', 1),
 ('es', 'Spanish', 'Español', 0),
 ('fr', 'French', 'Français', 0),
+('bs', 'Bosnian', 'Bosanski', 0),
+('hr', 'Croatian', 'Hrvatski', 0),
+('sr', 'Serbian', 'Српски', 0),
 ('id', 'Indonesian', 'Bahasa Indonesia', 0),
 ('tr', 'Turkish', 'Türkçe', 0),
 ('ur', 'Urdu', 'اردو', 1),
@@ -67,67 +127,41 @@ INSERT OR IGNORE INTO languages (code, name, native_name, rtl) VALUES
 ('ms', 'Malay', 'Bahasa Melayu', 0),
 ('fa', 'Persian', 'فارسی', 1);
 
--- Insert default zikrs
-INSERT OR IGNORE INTO zikrs (arabic, latin, identifier, default_repetitions) VALUES
-('سُبْحَانَ اللهِ', 'Subhan Allah', 'subhan_allah', 33),
-('الْحَمْدُ لِلّهِ', 'Alhamdulillah', 'alhamdulillah', 33),
-('اللّهُ أَكْبَرُ', 'Allahu Akbar', 'allahu_akbar', 34),
-('لَا إِلَهَ إِلَّا اللّهُ', 'La ilaha illa Allah', 'la_ilaha_illa_allah', 100),
-('اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ', 'Allahumma salli ala Muhammad', 'salawat', 10),
-('أَسْتَغْفِرُ اللّهَ', 'Astaghfirullah', 'astaghfirullah', 70),
-('لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّهِ', 'La hawla wa la quwwata illa billah', 'la_hawla', 10),
-('بِسْمِ اللّهِ', 'Bismillah', 'bismillah', 21),
-('رَبِّ اغْفِرْ لِي', 'Rabbi ghfir li', 'rabbi_ghfir_li', 25),
-('سُبْحَانَ اللهِ وَبِحَمْدِهِ', 'Subhan Allahi wa bihamdihi', 'subhan_allah_wa_bihamdihi', 100),
-('سُبْحَانَ اللهِ الْعَظِيمِ', 'Subhan Allah al-Azeem', 'subhan_allah_al_azeem', 10),
-('لَا إِلَهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ', 'La ilaha illa anta subhanaka inni kuntu min az-zalimin', 'dua_yunus', 3),
-('حَسْبُنَا اللّهُ وَنِعْمَ الْوَكِيلُ', 'Hasbuna Allah wa ni''ma al-wakeel', 'hasbuna_allah', 7),
-('رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ', 'Rabbana atina fi''d-dunya hasanatan wa fi''l-akhirati hasanatan wa qina azab an-nar', 'rabbana_atina', 3),
-('رَضِيتُ بِاللهِ رَبًّا وَبِالإِسْلَامِ دِينًا وَبِمُحَمَّدٍ رَسُولًا', 'Radeetu billahi rabban wa bil-islami deenan wa bi Muhammadin rasulan', 'radeetu_billahi', 3);
+-- Create default admin user with real bcrypt hash
+-- Password: admin123 (bcrypt hash with salt rounds 10)
+INSERT OR IGNORE INTO users (email, username, password_hash, first_name, last_name, role, is_active, email_verified) VALUES
+('admin@moiifaith.com', 'admin', '$2b$10$rOhUTx0.G7OKuL.HgvZk/eJ6FK2Px6YHYv4BoaGwTXKp0Xm8.xQG.', 'Admin', 'User', 'admin', 1, 1);
 
--- Insert default admin user (password should be properly hashed in production)
-INSERT OR IGNORE INTO admin_users (username, password_hash) VALUES
-('admin', '$2b$10$example_hash_here'); -- This should be a proper bcrypt hash
-
--- Insert default English translations
-INSERT OR IGNORE INTO translations (language_code, translation_key, translation_value) VALUES
-('en', 'subhan_allah', 'Glory be to Allah - expressing the perfection and transcendence of Allah'),
-('en', 'alhamdulillah', 'All praise is due to Allah - acknowledging Allah as the source of all good'),
-('en', 'allahu_akbar', 'Allah is the Greatest - acknowledging Allah''s supreme greatness'),
-('en', 'la_ilaha_illa_allah', 'There is no god but Allah - the declaration of faith'),
-('en', 'salawat', 'Blessings upon Prophet Muhammad - sending peace and blessings'),
-('en', 'astaghfirullah', 'I seek forgiveness from Allah - asking for Allah''s forgiveness'),
-('en', 'la_hawla', 'There is no power except with Allah - acknowledging Allah as the source of all strength'),
-('en', 'bismillah', 'In the name of Allah - beginning with Allah''s name'),
-('en', 'rabbi_ghfir_li', 'My Lord, forgive me - a personal prayer for forgiveness'),
-('en', 'subhan_allah_wa_bihamdihi', 'Glory be to Allah and praise to Him - combined glorification and praise'),
-('en', 'subhan_allah_al_azeem', 'Glory be to Allah, the Most Great - emphasizing Allah''s magnificence'),
-('en', 'dua_yunus', 'There is no god but You, glory be to You, I was among the wrongdoers - Prophet Yunus''s supplication'),
-('en', 'hasbuna_allah', 'Allah is sufficient for us and He is the best Disposer of affairs - expressing trust in Allah'),
-('en', 'rabbana_atina', 'Our Lord, give us good in this world and good in the next world and save us from the punishment of the Fire'),
-('en', 'radeetu_billahi', 'I am pleased with Allah as my Lord, Islam as my religion, and Muhammad as my messenger');
-
--- Insert Arabic translations
-INSERT OR IGNORE INTO translations (language_code, translation_key, translation_value) VALUES
-('ar', 'subhan_allah', 'تسبيح الله - التعبير عن كمال الله وتنزيهه'),
-('ar', 'alhamdulillah', 'الثناء والشكر لله - الاعتراف بأن الله مصدر كل خير'),
-('ar', 'allahu_akbar', 'الله أكبر - الاعتراف بعظمة الله العليا'),
-('ar', 'la_ilaha_illa_allah', 'لا إله إلا الله - شهادة التوحيد'),
-('ar', 'salawat', 'الصلاة على النبي محمد - إرسال السلام والبركات'),
-('ar', 'astaghfirullah', 'أستغفر الله - طلب المغفرة من الله'),
-('ar', 'la_hawla', 'لا حول ولا قوة إلا بالله - الاعتراف بأن الله مصدر كل قوة'),
-('ar', 'bismillah', 'بسم الله - البداية باسم الله'),
-('ar', 'rabbi_ghfir_li', 'رب اغفر لي - دعاء شخصي للمغفرة'),
-('ar', 'subhan_allah_wa_bihamdihi', 'سبحان الله وبحمده - الجمع بين التسبيح والحمد'),
-('ar', 'subhan_allah_al_azeem', 'سبحان الله العظيم - التأكيد على عظمة الله'),
-('ar', 'dua_yunus', 'لا إله إلا أنت سبحانك إني كنت من الظالمين - دعاء النبي يونس'),
-('ar', 'hasbuna_allah', 'حسبنا الله ونعم الوكيل - التعبير عن الثقة بالله'),
-('ar', 'rabbana_atina', 'ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار'),
-('ar', 'radeetu_billahi', 'رضيت بالله ربا وبالإسلام دينا وبمحمد رسولا');
+-- Insert default zikrs (public, not user-specific)
+INSERT OR IGNORE INTO zikrs (arabic, latin, identifier, default_repetitions, description, is_custom, is_public) VALUES
+('سُبْحَانَ اللهِ', 'Subhan Allah', 'subhan_allah', 33, 'Glory be to Allah', 0, 1),
+('الْحَمْدُ لِلّهِ', 'Alhamdulillah', 'alhamdulillah', 33, 'All praise is due to Allah', 0, 1),
+('اللّهُ أَكْبَرُ', 'Allahu Akbar', 'allahu_akbar', 34, 'Allah is the Greatest', 0, 1),
+('لَا إِلَهَ إِلَّا اللّهُ', 'La ilaha illa Allah', 'la_ilaha_illa_allah', 100, 'There is no god but Allah', 0, 1),
+('اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ', 'Allahumma salli ala Muhammad', 'salawat', 10, 'Blessings upon Prophet Muhammad', 0, 1),
+('أَسْتَغْفِرُ اللّهَ', 'Astaghfirullah', 'astaghfirullah', 70, 'I seek forgiveness from Allah', 0, 1),
+('لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّهِ', 'La hawla wa la quwwata illa billah', 'la_hawla', 10, 'There is no power except with Allah', 0, 1),
+('بِسْمِ اللّهِ', 'Bismillah', 'bismillah', 21, 'In the name of Allah', 0, 1),
+('رَبِّ اغْفِرْ لِي', 'Rabbi ghfir li', 'rabbi_ghfir_li', 25, 'My Lord, forgive me', 0, 1),
+('سُبْحَانَ اللهِ وَبِحَمْدِهِ', 'Subhan Allahi wa bihamdihi', 'subhan_allah_wa_bihamdihi', 100, 'Glory be to Allah and praise to Him', 0, 1),
+('سُبْحَانَ اللهِ الْعَظِيمِ', 'Subhan Allah al-Azeem', 'subhan_allah_al_azeem', 10, 'Glory be to Allah, the Most Great', 0, 1),
+('لَا إِلَهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ', 'La ilaha illa anta subhanaka inni kuntu min az-zalimin', 'dua_yunus', 3, 'There is no god but You, glory be to You, I was among the wrongdoers', 0, 1),
+('حَسْبُنَا اللّهُ وَنِعْمَ الْوَكِيلُ', 'Hasbuna Allah wa ni''ma al-wakeel', 'hasbuna_allah', 7, 'Allah is sufficient for us and He is the best Disposer of affairs', 0, 1),
+('رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ', 'Rabbana atina fi''d-dunya hasanatan wa fi''l-akhirati hasanatan wa qina azab an-nar', 'rabbana_atina', 3, 'Our Lord, give us good in this world and good in the next world', 0, 1),
+('رَضِيتُ بِاللهِ رَبًّا وَبِالإِسْلَامِ دِينًا وَبِمُحَمَّدٍ رَسُولًا', 'Radeetu billahi rabban wa bil-islami deenan wa bi Muhammadin rasulan', 'radeetu_billahi', 3, 'I am pleased with Allah as my Lord, Islam as my religion, and Muhammad as my messenger', 0, 1);
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_translations_lang_key ON translations(language_code, translation_key);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_zikrs_user_id ON zikrs(user_id);
 CREATE INDEX IF NOT EXISTS idx_zikrs_identifier ON zikrs(identifier);
-CREATE INDEX IF NOT EXISTS idx_zikrs_active ON zikrs(is_active);
+CREATE INDEX IF NOT EXISTS idx_zikrs_custom ON zikrs(is_custom);
+CREATE INDEX IF NOT EXISTS idx_user_progress_user_date ON user_progress(user_id, date);
+CREATE INDEX IF NOT EXISTS idx_user_progress_zikr ON user_progress(zikr_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_user ON user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_zikr ON user_sessions(zikr_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_date ON user_sessions(DATE(start_time));
 CREATE INDEX IF NOT EXISTS idx_languages_code ON languages(code);
 CREATE INDEX IF NOT EXISTS idx_languages_active ON languages(is_active);
+CREATE INDEX IF NOT EXISTS idx_translation_versions_lang ON translation_versions(language_code);

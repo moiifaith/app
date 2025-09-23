@@ -4,7 +4,7 @@ pages_build_output_dir = "dist"
 
 [env.production]
 # D1 Database binding (you'll get the database_id after creating the database)
-[[d1_databases]]
+[[env.production.d1_databases]]
 binding = "zikr_database"
 database_name = "zikr-database"
 database_id = "fde30fbc-0328-4f67-8145-686d24687832"
