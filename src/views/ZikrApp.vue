@@ -3,8 +3,18 @@
     <header class="app-header">
       <h1>{{ $t('zikr.appName') }}</h1>
       <div class="header-actions">
+        <router-link 
+          v-if="isAdmin" 
+          to="/admin" 
+          class="admin-btn"
+        >
+          {{ $t('admin.panel') || 'Admin Panel' }}
+        </router-link>
         <button @click="showHistory" class="history-btn">
           {{ $t('zikr.history') }}
+        </button>
+        <button @click="handleLogout" class="logout-btn">
+          {{ $t('auth.logout') || 'Logout' }}
         </button>
         <div class="language-selector">
           <select v-model="currentLanguage" @change="changeLanguage">
@@ -89,9 +99,33 @@
 <script>
 import { zikrData } from '../data/zikrs'
 import { zikrDescriptions } from '../data/zikrDescriptions'
+import { useAuth } from '@/composables/useAuth'
+import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 
 export default {
   name: 'ZikrApp',
+  setup() {
+    const { isAuthenticated, user, logout, isAdmin: checkIsAdmin } = useAuth()
+    const router = useRouter()
+    
+    const isAdmin = computed(() => {
+      return checkIsAdmin()
+    })
+
+    const handleLogout = async () => {
+      await logout()
+      // Redirect to landing page after logout
+      router.push('/')
+    }
+
+    return {
+      isAuthenticated,
+      user,
+      isAdmin,
+      handleLogout
+    }
+  },
   data() {
     return {
       currentLanguage: 'en',
@@ -227,7 +261,25 @@ export default {
   gap: 15px;
 }
 
-.history-btn {
+.admin-btn {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.admin-btn:hover {
+  background: #ff5252;
+  transform: translateY(-1px);
+}
+
+.history-btn,
+.logout-btn {
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -235,9 +287,11 @@ export default {
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-size: 14px;
 }
 
-.history-btn:hover {
+.history-btn:hover,
+.logout-btn:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 

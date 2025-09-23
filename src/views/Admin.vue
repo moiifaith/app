@@ -1,10 +1,15 @@
 <template>
   <div class="admin-panel">
     <header class="admin-header">
-      <h1>{{ $t('admin.adminPanel') }}</h1>
+      <div class="header-left">
+        <h1>{{ $t('admin.adminPanel') || 'Admin Panel' }}</h1>
+        <router-link to="/zikr-app" class="back-to-app-btn">
+          ← {{ $t('admin.backToApp') || 'Back to App' }}
+        </router-link>
+      </div>
       <div class="header-actions">
-        <span class="welcome-text">{{ $t('admin.welcome') }}, {{ adminUser }}</span>
-        <button @click="logout" class="logout-btn">{{ $t('admin.logout') }}</button>
+        <span class="welcome-text">{{ $t('admin.welcome') || 'Welcome' }}, {{ user?.firstName || user?.username }}</span>
+        <button @click="handleLogout" class="logout-btn">{{ $t('admin.logout') || 'Logout' }}</button>
       </div>
     </header>
 
@@ -237,12 +242,27 @@
 <script>
 import { zikrData } from '../data/zikrs'
 import { zikrDescriptions } from '../data/zikrDescriptions'
+import { useAuth } from '@/composables/useAuth'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'AdminPanel',
+  setup() {
+    const { user, logout } = useAuth()
+    const router = useRouter()
+
+    const handleLogout = async () => {
+      await logout()
+      router.push('/')
+    }
+
+    return {
+      user,
+      handleLogout
+    }
+  },
   data() {
     return {
-      adminUser: '',
       currentSection: 'zikrs',
       zikrs: [],
       showAddZikrModal: false,
@@ -268,19 +288,12 @@ export default {
     }
   },
   mounted() {
-    this.adminUser = localStorage.getItem('adminUser') || 'Admin'
     this.loadZikrs()
     this.loadTranslations()
     this.loadUserStats()
     this.loadAnalytics()
   },
   methods: {
-    logout() {
-      localStorage.removeItem('adminToken')
-      localStorage.removeItem('adminUser')
-      this.$router.push('/admin/login')
-    },
-
     loadZikrs() {
       // In production, this would fetch from your API
       this.zikrs = [...zikrData]
@@ -444,9 +457,30 @@ export default {
   align-items: center;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .admin-header h1 {
   margin: 0;
   font-size: 1.8rem;
+}
+
+.back-to-app-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.back-to-app-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .header-actions {

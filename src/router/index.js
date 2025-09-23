@@ -43,11 +43,6 @@ const routes = [
     name: 'Admin',
     component: () => import(/* webpackChunkName: "admin" */ '../views/Admin.vue'),
     meta: { requiresAuth: true, requiresAdmin: true }
-  },
-  {
-    path: '/admin/login',
-    name: 'AdminLogin',
-    component: () => import(/* webpackChunkName: "admin-login" */ '../views/AdminLogin.vue')
   }
 ]
 
@@ -68,7 +63,7 @@ router.beforeEach(async (to, from, next) => {
   // Check admin routes
   if (to.matched.some(record => record.meta.requiresAdmin)) {
     if (!isAuthenticated.value || !isAdmin()) {
-      next('/admin/login')
+      next('/login')
       return
     }
   }
