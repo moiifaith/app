@@ -1,32 +1,6 @@
 // Authentication endpoints
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = 'your-super-secret-jwt-key-change-in-production'; // In production, use environment variable
-const JWT_EXPIRES_IN = '7d';
-
-// Helper function to generate JWT token
-function generateToken(user) {
-  return jwt.sign(
-    { 
-      id: user.id, 
-      email: user.email, 
-      username: user.username, 
-      role: user.role 
-    },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
-  );
-}
-
-// Helper function to verify JWT token
-function verifyToken(token) {
-  try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
-    return null;
-  }
-}
+import { generateToken, verifyToken } from './jwt-utils.js';
 
 // Register new user
 export async function onRequestPost(context) {

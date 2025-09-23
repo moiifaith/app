@@ -1,22 +1,6 @@
 // Register endpoint
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = 'your-super-secret-jwt-key-change-in-production';
-const JWT_EXPIRES_IN = '7d';
-
-function generateToken(user) {
-  return jwt.sign(
-    { 
-      id: user.id, 
-      email: user.email, 
-      username: user.username, 
-      role: user.role 
-    },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
-  );
-}
+import { generateToken } from './jwt-utils.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -72,7 +56,7 @@ export async function onRequestPost(context) {
     ).bind(result.meta.last_row_id).first();
     
     // Generate JWT token
-    const token = generateToken(newUser);
+    const token = await generateToken(newUser);
     
     return new Response(JSON.stringify({
       success: true,
