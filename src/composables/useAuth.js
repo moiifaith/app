@@ -25,7 +25,7 @@ export function useAuth() {
 
         if (response.ok) {
           const userData = await response.json()
-          user.value = userData
+          user.value = userData.data.user
           isAuthenticated.value = true
         } else {
           // Token is invalid, clear it
