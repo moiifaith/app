@@ -26,7 +26,10 @@ export async function onRequestGet(context) {
         { code: 'en', name: 'English', native_name: 'English', rtl: 0 },
         { code: 'ar', name: 'Arabic', native_name: 'العربية', rtl: 1 },
         { code: 'es', name: 'Spanish', native_name: 'Español', rtl: 0 },
-        { code: 'fr', name: 'French', native_name: 'Français', rtl: 0 }
+        { code: 'fr', name: 'French', native_name: 'Français', rtl: 0 },
+        { code: 'bs', name: 'Bosnian', native_name: 'Bosanski', rtl: 0 },
+        { code: 'hr', name: 'Croatian', native_name: 'Hrvatski', rtl: 0 },
+        { code: 'sr', name: 'Serbian', native_name: 'Српски', rtl: 0 }
       ];
     }
     

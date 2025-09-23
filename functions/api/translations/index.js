@@ -60,6 +60,31 @@ export async function onRequestGet(context) {
           bismillah: 'بسم الله - البداية باسم الله',
           rabbi_ghfir_li: 'رب اغفر لي - دعاء شخصي للمغفرة',
           subhan_allah_wa_bihamdihi: 'سبحان الله وبحمده - الجمع بين التسبيح والحمد'
+        },
+        es: {
+          subhan_allah: 'Gloria a Allah - expresando la perfección y trascendencia de Allah',
+          alhamdulillah: 'Toda alabanza es para Allah - reconociendo a Allah como fuente de todo bien',
+          allahu_akbar: 'Allah es el más Grande - reconociendo la suprema grandeza de Allah'
+        },
+        fr: {
+          subhan_allah: 'Gloire à Allah - exprimant la perfection et la transcendance d\'Allah',
+          alhamdulillah: 'Toute louange revient à Allah - reconnaissant Allah comme source de tout bien',
+          allahu_akbar: 'Allah est le plus Grand - reconnaissant la suprême grandeur d\'Allah'
+        },
+        bs: {
+          subhan_allah: 'Slave Allahu - izražavanje Allahove savršenosti i transcendencije',
+          alhamdulillah: 'Sva hvala pripada Allahu - priznavajući Allah kao izvor sveg dobra',
+          allahu_akbar: 'Allah je najveći - priznavajući Allahovu vrhovnu veličinu'
+        },
+        hr: {
+          subhan_allah: 'Slava Allahu - izražavanje Allahove savršenosti i transcendencije',
+          alhamdulillah: 'Sva hvala pripada Allahu - priznavajući Allah kao izvor sveg dobra',
+          allahu_akbar: 'Allah je najveći - priznavajući Allahovu vrhovnu veličinu'
+        },
+        sr: {
+          subhan_allah: 'Слава Аллаху - изражавање Аллахове савршености и трансценденције',
+          alhamdulillah: 'Сва хвала припада Аллаху - признајући Аллах као извор свег добра',
+          allahu_akbar: 'Аллах је највећи - признајући Аллахову врховну величину'
         }
       };
       translationsData = defaultTranslations[lang] || defaultTranslations.en;

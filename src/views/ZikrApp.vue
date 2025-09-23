@@ -12,6 +12,9 @@
             <option value="ar">العربية</option>
             <option value="es">Español</option>
             <option value="fr">Français</option>
+            <option value="bs">Bosanski</option>
+            <option value="hr">Hrvatski</option>
+            <option value="sr">Српски</option>
           </select>
         </div>
       </div>

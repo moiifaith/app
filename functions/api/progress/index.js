@@ -173,7 +173,9 @@ export default {
         }
 
         // Execute all queries
-        await env.MOII_DB.batch(batch)
+        if (batch.length > 0) {
+          await env.MOII_DB.batch(batch)
+        }
 
         // Update user language preference
         if (language) {
