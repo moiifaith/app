@@ -243,21 +243,37 @@
 import { zikrData } from '../data/zikrs'
 import { zikrDescriptions } from '../data/zikrDescriptions'
 import { useAuth } from '@/composables/useAuth'
+import { useModal } from '@/composables/useModal'
 import { useRouter } from 'vue-router'
 
 export default {
   name: 'AdminPanel',
   setup() {
     const { user, logout, getAuthHeaders } = useAuth()
+    const { showAlert, showConfirm } = useModal()
     const router = useRouter()
 
     const handleLogout = async () => {
-      await logout()
-      router.push('/')
+      const confirmed = await showConfirm(
+        'Are you sure you want to logout? Any unsaved changes will be lost.',
+        { 
+          type: 'warning', 
+          title: 'Confirm Logout',
+          confirmText: 'Logout',
+          cancelText: 'Cancel'
+        }
+      )
+      
+      if (confirmed) {
+        await logout()
+        router.push('/')
+      }
     }
 
     return {
       user,
+      showAlert,
+      showConfirm,
       handleLogout,
       getAuthHeaders
     }
@@ -353,13 +369,22 @@ export default {
         const data = await response.json()
         if (data.success) {
           this.translationsDirty = false
-          alert(this.$t('admin.translationsSaved') || 'Translations saved successfully!')
+          await this.showAlert(
+            this.$t('admin.translationsSaved') || 'Translations saved successfully!',
+            { type: 'success', title: this.$t('admin.success') || 'Success' }
+          )
         } else {
-          alert(`Failed to save translations: ${data.message}`)
+          await this.showAlert(
+            `Failed to save translations: ${data.message}`,
+            { type: 'error', title: this.$t('admin.error') || 'Error' }
+          )
         }
       } catch (error) {
         console.error('Error saving translations:', error)
-        alert('Failed to save translations. Please try again.')
+        await this.showAlert(
+          'Failed to save translations. Please try again.',
+          { type: 'error', title: this.$t('admin.error') || 'Error' }
+        )
       }
     },
 
@@ -398,18 +423,37 @@ export default {
           // Reload zikrs to get updated data
           await this.loadZikrs()
           this.closeZikrModal()
-          alert(this.$t('admin.zikrSaved') || 'Zikr saved successfully!')
+          await this.showAlert(
+            this.$t('admin.zikrSaved') || 'Zikr saved successfully!',
+            { type: 'success', title: this.$t('admin.success') || 'Success' }
+          )
         } else {
-          alert(`Failed to save zikr: ${data.message}`)
+          await this.showAlert(
+            `Failed to save zikr: ${data.message}`,
+            { type: 'error', title: this.$t('admin.error') || 'Error' }
+          )
         }
       } catch (error) {
         console.error('Error saving zikr:', error)
-        alert('Failed to save zikr. Please try again.')
+        await this.showAlert(
+          'Failed to save zikr. Please try again.',
+          { type: 'error', title: this.$t('admin.error') || 'Error' }
+        )
       }
     },
 
     async deleteZikr(id) {
-      if (confirm(this.$t('admin.confirmDeleteZikr') || 'Are you sure you want to delete this zikr?')) {
+      const confirmed = await this.showConfirm(
+        this.$t('admin.confirmDeleteZikr') || 'Are you sure you want to delete this zikr?',
+        { 
+          type: 'danger', 
+          title: this.$t('admin.confirmDelete') || 'Confirm Delete',
+          confirmText: this.$t('admin.delete') || 'Delete',
+          cancelText: this.$t('admin.cancel') || 'Cancel'
+        }
+      )
+      
+      if (confirmed) {
         try {
           const response = await fetch(`/api/zikrs/${id}`, {
             method: 'DELETE',
@@ -422,13 +466,22 @@ export default {
           if (data.success) {
             // Reload zikrs to get updated data
             await this.loadZikrs()
-            alert(this.$t('admin.zikrDeleted') || 'Zikr deleted successfully!')
+            await this.showAlert(
+              this.$t('admin.zikrDeleted') || 'Zikr deleted successfully!',
+              { type: 'success', title: this.$t('admin.success') || 'Success' }
+            )
           } else {
-            alert(`Failed to delete zikr: ${data.message}`)
+            await this.showAlert(
+              `Failed to delete zikr: ${data.message}`,
+              { type: 'error', title: this.$t('admin.error') || 'Error' }
+            )
           }
         } catch (error) {
           console.error('Error deleting zikr:', error)
-          alert('Failed to delete zikr. Please try again.')
+          await this.showAlert(
+            'Failed to delete zikr. Please try again.',
+            { type: 'error', title: this.$t('admin.error') || 'Error' }
+          )
         }
       }
     },

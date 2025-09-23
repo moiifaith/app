@@ -19,24 +19,36 @@ const routes = [
     component: () => import(/* webpackChunkName: "auth" */ '../views/Register.vue')
   },
   {
-    path: '/zikr-app',
+    path: '/zikrs',
     name: 'ZikrApp',
     component: () => import(/* webpackChunkName: "zikr-app" */ '../views/ZikrApp.vue')
   },
   {
     path: '/app',
-    redirect: '/zikr-app'
+    redirect: '/zikrs'
   },
   {
-    path: '/app/zikr/:id',
+    path: '/zikr-app',
+    redirect: '/zikrs'
+  },
+  {
+    path: '/zikrs/counter/:id',
     name: 'ZikrCounter',
     component: () => import(/* webpackChunkName: "zikr" */ '../views/ZikrCounter.vue'),
     props: true
   },
   {
-    path: '/app/history',
+    path: '/zikrs/history',
     name: 'ZikrHistory',
     component: () => import(/* webpackChunkName: "history" */ '../views/ZikrHistory.vue')
+  },
+  {
+    path: '/app/zikr/:id',
+    redirect: to => `/zikrs/counter/${to.params.id}`
+  },
+  {
+    path: '/app/history',
+    redirect: '/zikrs/history'
   },
   {
     path: '/admin',
@@ -78,7 +90,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Redirect authenticated users away from auth pages
   if (isAuthenticated.value && (to.name === 'Login' || to.name === 'Register')) {
-    next('/zikr-app')
+    next('/zikrs')
     return
   }
 

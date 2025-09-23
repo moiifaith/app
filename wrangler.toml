@@ -9,32 +9,12 @@ binding = "zikr_database"
 database_name = "zikr-database"
 database_id = "fde30fbc-0328-4f67-8145-686d24687832"
 
-[env.production]
-# D1 Database binding (you'll get the database_id after creating the database)
-[[env.production.d1_databases]]
-binding = "zikr_database"
-database_name = "zikr-database"
-database_id = "fde30fbc-0328-4f67-8145-686d24687832"
-
-# KV Namespace for translations
-[[env.production.kv_namespaces]]
+# KV Namespace for translations (local development)
+[[kv_namespaces]]
 binding = "TRANSLATIONS"
 id = "919dd8d44f6f4ee38457b81c5a9a8139"
+preview_id = "919dd8d44f6f4ee38457b81c5a9a8139"
 
-# Environment variables for production
-[env.production.vars]
-ENVIRONMENT = "production"
-
-# Preview/staging environment
-[env.preview]
-[[env.preview.d1_databases]]
-binding = "DB"
-database_name = "zikr-database-preview"
-database_id = "YOUR_PREVIEW_DATABASE_ID_HERE"
-
-[[env.preview.kv_namespaces]]
-binding = "TRANSLATIONS"
-id = "919dd8d44f6f4ee38457b81c5a9a8139"
-
-[env.preview.vars]
-ENVIRONMENT = "preview"
+# Environment variables for development
+[vars]
+ENVIRONMENT = "development"

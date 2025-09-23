@@ -6,7 +6,11 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "dev:local": "npm run build && wrangler pages dev dist --local --port 8080",
+    "dev:remote": "npm run build && wrangler pages dev dist --port 8080",
+    "db:execute": "wrangler d1 execute zikr-database --local",
+    "db:execute-remote": "wrangler d1 execute zikr-database"
   },
   "dependencies": {
     "@capacitor-community/safe-area": "^7.0.0-alpha.1",

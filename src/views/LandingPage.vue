@@ -1,5 +1,34 @@
 <template>
   <div class="landing-page">
+    <!-- Header Section -->
+    <header class="landing-header">
+      <nav class="nav-container">
+        <router-link to="/" class="logo-title-link">
+          <div class="logo-section">
+            <div class="logo-placeholder">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <span class="logo-title">MoiiFaith</span>
+          </div>
+        </router-link>
+        <div class="nav-links">
+          <router-link to="/zikrs" class="nav-link app-link">Open App</router-link>
+          <router-link to="/login" class="nav-link">{{ $t('auth.login.button') }}</router-link>
+          <router-link to="/register" class="nav-link">{{ $t('auth.register.button') }}</router-link>
+          <div class="language-selector">
+            <CustomSelect
+              :options="languageOptions"
+              v-model="currentLanguage"
+              theme="landing"
+              placeholder="Language"
+            />
+          </div>
+        </div>
+      </nav>
+    </header>
+
     <!-- Hero Section -->
     <section class="hero">
       <div class="hero-content">
@@ -14,7 +43,7 @@
           </router-link>
         </div>
         <div class="hero-actions" v-else>
-          <router-link to="/zikr-app" class="cta-button primary">
+          <router-link to="/zikrs" class="cta-button primary">
             {{ $t('zikr.startZikr') }}
           </router-link>
         </div>
@@ -87,7 +116,7 @@
             {{ $t('auth.login.button') }}
           </router-link>
         </div>
-        <router-link v-else to="/zikr-app" class="cta-button large primary">
+        <router-link v-else to="/zikrs" class="cta-button large primary">
           {{ $t('zikr.startNow') }}
         </router-link>
       </div>
@@ -97,14 +126,43 @@
 
 <script>
 import { useAuth } from '@/composables/useAuth'
+import CustomSelect from '@/components/CustomSelect.vue'
 
 export default {
   name: 'LandingPage',
+  components: {
+    CustomSelect
+  },
   setup() {
     const { isAuthenticated } = useAuth()
     
     return {
       isAuthenticated
+    }
+  },
+  data() {
+    return {
+      currentLanguage: 'en',
+      languageOptions: [
+        { value: 'en', label: 'English' },
+        { value: 'ar', label: 'العربية' },
+        { value: 'es', label: 'Español' },
+        { value: 'fr', label: 'Français' },
+        { value: 'bs', label: 'Bosanski' },
+        { value: 'hr', label: 'Hrvatski' },
+        { value: 'sr', label: 'Српски' }
+      ]
+    }
+  },
+  mounted() {
+    // Initialize current language from i18n or localStorage
+    this.currentLanguage = this.$i18n.locale || localStorage.getItem('selectedLanguage') || 'en'
+  },
+  watch: {
+    currentLanguage(newLanguage) {
+      console.log('LandingPage: language changed to', newLanguage)
+      this.$i18n.locale = newLanguage
+      localStorage.setItem('selectedLanguage', newLanguage)
     }
   }
 }
@@ -113,6 +171,109 @@ export default {
 <style scoped>
 .landing-page {
   min-height: 100vh;
+}
+
+/* Header Styles */
+.landing-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-container {
+  width: 100%;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-title-link {
+  text-decoration: none;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.logo-title-link:hover {
+  transform: translateY(-2px);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.logo-title-link:hover .logo-placeholder {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(10deg);
+}
+
+.logo-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.language-selector {
+  margin-right: 0.5rem;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  border: 2px solid white;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link:hover {
+  background: white;
+  color: #5a6fd8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.app-link {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.app-link:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4c93 100%) !important;
+  color: white !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .container {
@@ -125,8 +286,8 @@ export default {
 .hero {
   display: flex;
   align-items: center;
-  min-height: 80vh;
-  padding: 60px 20px;
+  min-height: 100vh;
+  padding: 100px 20px 60px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
@@ -172,38 +333,59 @@ export default {
 
 .cta-button {
   display: inline-block;
-  background: #ff6b6b;
+  background: rgba(255, 255, 255, 0.2);
   color: white;
-  padding: 15px 30px;
-  border-radius: 50px;
+  padding: 12px 24px;
+  border-radius: 25px;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.cta-button:hover::before {
+  left: 100%;
 }
 
 .cta-button.primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  border-color: transparent;
 }
 
 .cta-button.secondary {
-  background: transparent;
-  border: 2px solid white;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   color: white;
-  box-shadow: none;
 }
 
 .cta-button.secondary:hover {
-  background: white;
-  color: #667eea;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
 }
 
 .cta-button:hover {
-  background: #ff5252;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }
 
 .cta-button.primary:hover {
@@ -323,6 +505,25 @@ export default {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 1rem;
+  }
+  
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .language-selector {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+    order: -1; /* Put language selector at the top on mobile */
+  }
+  
   .hero {
     flex-direction: column;
     text-align: center;

@@ -1,7 +1,17 @@
 <template>
   <div class="zikr-app">
     <header class="app-header">
-      <h1>{{ $t('zikr.appName') }}</h1>
+      <router-link to="/" class="logo-title-link">
+        <div class="logo-section">
+          <div class="logo-placeholder">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+          </div>
+          <span class="logo-title">{{ $t('zikr.appName') }}</span>
+        </div>
+      </router-link>
+      
       <div class="header-actions">
         <router-link 
           v-if="isAdmin" 
@@ -13,19 +23,27 @@
         <button @click="showHistory" class="history-btn">
           {{ $t('zikr.history') }}
         </button>
-        <button @click="handleLogout" class="logout-btn">
+        <button 
+          v-if="isAuthenticated" 
+          @click="handleLogout" 
+          class="logout-btn"
+        >
           {{ $t('auth.logout') || 'Logout' }}
         </button>
+        <router-link 
+          v-else 
+          to="/login" 
+          class="login-btn"
+        >
+          {{ $t('auth.login') || 'Login' }}
+        </router-link>
         <div class="language-selector">
-          <select v-model="currentLanguage" @change="changeLanguage">
-            <option value="en">English</option>
-            <option value="ar">العربية</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-            <option value="bs">Bosanski</option>
-            <option value="hr">Hrvatski</option>
-            <option value="sr">Српски</option>
-          </select>
+          <CustomSelect
+            :options="languageOptions"
+            v-model="currentLanguage"
+            theme="app"
+            placeholder="Language"
+          />
         </div>
       </div>
     </header>
@@ -51,7 +69,7 @@
         <h2>{{ $t('zikr.availableZikrs') }}</h2>
         <div class="zikr-grid">
           <div 
-            v-for="zikr in zikrs" 
+            v-for="zikr in paginatedZikrs" 
             :key="zikr.id"
             class="zikr-card"
             :class="{ completed: isZikrCompletedToday(zikr.id) }"
@@ -91,6 +109,37 @@
             </div>
           </div>
         </div>
+        
+        <!-- Pagination Controls -->
+        <div v-if="totalPages > 1" class="pagination">
+          <button 
+            @click="goToPage(currentPage - 1)" 
+            :disabled="currentPage === 1"
+            class="pagination-btn prev-btn"
+          >
+            &#8249; {{ $t('zikr.previous') || 'Previous' }}
+          </button>
+          
+          <div class="pagination-numbers">
+            <button
+              v-for="page in visiblePages"
+              :key="page"
+              @click="goToPage(page)"
+              :class="{ active: page === currentPage }"
+              class="pagination-number"
+            >
+              {{ page }}
+            </button>
+          </div>
+          
+          <button 
+            @click="goToPage(currentPage + 1)" 
+            :disabled="currentPage === totalPages"
+            class="pagination-btn next-btn"
+          >
+            {{ $t('zikr.next') || 'Next' }} &#8250;
+          </button>
+        </div>
       </section>
     </main>
   </div>
@@ -100,13 +149,19 @@
 import { zikrData } from '../data/zikrs'
 import { zikrDescriptions } from '../data/zikrDescriptions'
 import { useAuth } from '@/composables/useAuth'
+import { useModal } from '@/composables/useModal'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
+import CustomSelect from '@/components/CustomSelect.vue'
 
 export default {
   name: 'ZikrApp',
+  components: {
+    CustomSelect
+  },
   setup() {
     const { isAuthenticated, user, logout, isAdmin: checkIsAdmin } = useAuth()
+    const { showConfirm } = useModal()
     const router = useRouter()
     
     const isAdmin = computed(() => {
@@ -114,9 +169,21 @@ export default {
     })
 
     const handleLogout = async () => {
-      await logout()
-      // Redirect to landing page after logout
-      router.push('/')
+      const confirmed = await showConfirm(
+        'Are you sure you want to logout?',
+        { 
+          type: 'warning', 
+          title: 'Confirm Logout',
+          confirmText: 'Logout',
+          cancelText: 'Cancel'
+        }
+      )
+      
+      if (confirmed) {
+        await logout()
+        // Redirect to landing page after logout
+        router.push('/')
+      }
     }
 
     return {
@@ -126,13 +193,59 @@ export default {
       handleLogout
     }
   },
+  computed: {
+    totalPages() {
+      return Math.ceil(this.zikrs.length / this.itemsPerPage)
+    },
+    paginatedZikrs() {
+      const start = (this.currentPage - 1) * this.itemsPerPage
+      const end = start + this.itemsPerPage
+      return this.zikrs.slice(start, end)
+    },
+    visiblePages() {
+      const pages = []
+      const maxVisible = 5
+      let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2))
+      let end = Math.min(this.totalPages, start + maxVisible - 1)
+      
+      // Adjust start if we're near the end
+      if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1)
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i)
+      }
+      return pages
+    }
+  },
   data() {
     return {
       currentLanguage: 'en',
+      languageOptions: [
+        { value: 'en', label: 'English' },
+        { value: 'ar', label: 'العربية' },
+        { value: 'es', label: 'Español' },
+        { value: 'fr', label: 'Français' },
+        { value: 'bs', label: 'Bosanski' },
+        { value: 'hr', label: 'Hrvatski' },
+        { value: 'sr', label: 'Српски' }
+      ],
       zikrs: [],
       todayCompletedCount: 0,
       todayTotalCount: 0,
-      descriptions: {}
+      descriptions: {},
+      // Pagination
+      currentPage: 1,
+      itemsPerPage: 6
+    }
+  },
+  watch: {
+    currentLanguage(newLanguage) {
+      console.log('ZikrApp: language changed to', newLanguage)
+      localStorage.setItem('selectedLanguage', newLanguage)
+      this.$i18n.locale = newLanguage
+      this.descriptions = zikrDescriptions[newLanguage] || zikrDescriptions.en
     }
   },
   mounted() {
@@ -144,21 +257,69 @@ export default {
       this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en'
       this.descriptions = zikrDescriptions[this.currentLanguage] || zikrDescriptions.en
       
-      // Initialize zikrs with default repetitions
-      this.zikrs = zikrData.map(zikr => ({
-        ...zikr,
-        currentReps: zikr.defaultRepetitions
-      }))
-      
-      // Load saved repetitions preferences
-      const savedReps = JSON.parse(localStorage.getItem('zikrRepetitions') || '{}')
-      this.zikrs.forEach(zikr => {
-        if (savedReps[zikr.id]) {
-          zikr.currentReps = savedReps[zikr.id]
+      // Load zikrs from API/database
+      await this.loadZikrs()
+    },
+
+    async loadZikrs() {
+      try {
+        const response = await fetch('/api/zikrs')
+        const data = await response.json()
+        if (data.success) {
+          // Initialize zikrs with current repetitions
+          this.zikrs = data.data.map(zikr => ({
+            ...zikr,
+            currentReps: zikr.defaultRepetitions
+          }))
+          
+          // Load saved repetitions preferences
+          const savedReps = JSON.parse(localStorage.getItem('zikrRepetitions') || '{}')
+          this.zikrs.forEach(zikr => {
+            if (savedReps[zikr.id]) {
+              zikr.currentReps = savedReps[zikr.id]
+            }
+          })
+          
+          // Update today's stats after loading zikrs
+          this.updateTodayStats()
+        } else {
+          console.error('Failed to load zikrs:', data.message)
+          // Fallback to local data
+          this.zikrs = zikrData.map(zikr => ({
+            ...zikr,
+            currentReps: zikr.defaultRepetitions
+          }))
+          
+          // Load saved repetitions preferences
+          const savedReps = JSON.parse(localStorage.getItem('zikrRepetitions') || '{}')
+          this.zikrs.forEach(zikr => {
+            if (savedReps[zikr.id]) {
+              zikr.currentReps = savedReps[zikr.id]
+            }
+          })
+          
+          // Update today's stats after loading fallback data
+          this.updateTodayStats()
         }
-      })
-      
-      this.updateTodayStats()
+      } catch (error) {
+        console.error('Error loading zikrs:', error)
+        // Fallback to local data
+        this.zikrs = zikrData.map(zikr => ({
+          ...zikr,
+          currentReps: zikr.defaultRepetitions
+        }))
+        
+        // Load saved repetitions preferences
+        const savedReps = JSON.parse(localStorage.getItem('zikrRepetitions') || '{}')
+        this.zikrs.forEach(zikr => {
+          if (savedReps[zikr.id]) {
+            zikr.currentReps = savedReps[zikr.id]
+          }
+        })
+        
+        // Update today's stats after loading fallback data
+        this.updateTodayStats()
+      }
     },
     
     updateTodayStats() {
@@ -180,12 +341,6 @@ export default {
     
     getZikrDescription(identifier) {
       return this.descriptions[identifier] || ''
-    },
-    
-    changeLanguage() {
-      localStorage.setItem('selectedLanguage', this.currentLanguage)
-      this.$i18n.locale = this.currentLanguage
-      this.descriptions = zikrDescriptions[this.currentLanguage] || zikrDescriptions.en
     },
     
     increaseReps(zikrId) {
@@ -229,6 +384,25 @@ export default {
     
     showHistory() {
       this.$router.push({ name: 'ZikrHistory' })
+    },
+
+    // Pagination methods
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++
+      }
+    },
+
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--
+      }
     }
   }
 }
@@ -248,6 +422,46 @@ export default {
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo-title-link {
+  text-decoration: none;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.logo-title-link:hover {
+  transform: translateY(-2px);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.logo-title-link:hover .logo-placeholder {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(10deg);
+}
+
+.logo-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin: 0;
 }
 
 .app-header h1 {
@@ -279,7 +493,8 @@ export default {
 }
 
 .history-btn,
-.logout-btn {
+.logout-btn,
+.login-btn {
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -288,20 +503,15 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 14px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
 
 .history-btn:hover,
-.logout-btn:hover {
+.logout-btn:hover,
+.login-btn:hover {
   background: rgba(255, 255, 255, 0.3);
-}
-
-.language-selector select {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 8px 12px;
-  border-radius: 15px;
-  cursor: pointer;
 }
 
 .app-main {
@@ -480,6 +690,81 @@ export default {
   background: #218838;
 }
 
+.start-btn.completed:hover {
+  background: #218838;
+}
+
+/* Pagination Styles */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 30px;
+  padding: 20px 0;
+}
+
+.pagination-btn {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.pagination-numbers {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-number {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-number:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.pagination-number.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.pagination-number.active:hover {
+  background: #5a6fd8;
+  border-color: #5a6fd8;
+}
+
 @media (max-width: 768px) {
   .app-header {
     flex-direction: column;
@@ -497,6 +782,22 @@ export default {
 
   .progress-stats {
     justify-content: center;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pagination-btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .pagination-number {
+    padding: 8px 10px;
+    min-width: 40px;
+    font-size: 14px;
   }
 }
 </style>

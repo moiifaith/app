@@ -164,7 +164,7 @@
                   'good-progress': day.completionRate >= 0.7,
                   'some-progress': day.completionRate > 0 && day.completionRate < 0.7
                 }"
-                @click="viewDayDetails(day.date)"
+                @click="viewDayDetails(day.isoDate)"
               >
                 <span class="day-number">{{ day.dayNumber }}</span>
                 <div v-if="day.hasData" class="day-progress">
@@ -198,17 +198,40 @@ export default {
       selectedDateData: [],
       monthlyData: [],
       monthlyStats: { activeDays: 0, totalCompleted: 0, totalRepetitions: 0 },
-      monthlyCalendar: []
+      monthlyCalendar: [],
+      zikrs: [] // Store loaded zikrs for name lookups
     }
   },
   mounted() {
-    this.loadTodayData()
-    this.loadDailyData()
-    this.loadMonthlyData()
+    this.loadZikrsAndInitialize()
   },
   methods: {
+    async loadZikrsAndInitialize() {
+      try {
+        // Load zikrs from API first
+        const response = await fetch('/api/zikrs')
+        const data = await response.json()
+        
+        if (data.success) {
+          this.zikrs = data.data
+        } else {
+          // Fallback to local data
+          this.zikrs = zikrData
+        }
+      } catch (error) {
+        console.error('Error loading zikrs:', error)
+        // Fallback to local data
+        this.zikrs = zikrData
+      }
+      
+      // Now load the history data
+      this.loadTodayData()
+      this.loadDailyData()
+      this.loadMonthlyData()
+    },
+
     goBack() {
-      this.$router.push('/app')
+      this.$router.push('/zikrs')
     },
 
     loadTodayData() {
@@ -288,6 +311,8 @@ export default {
       for (let day = 1; day <= lastDay.getDate(); day++) {
         const currentDate = new Date(year, month - 1, day)
         const dateString = currentDate.toDateString()
+        // Store both date string and ISO date for reliable conversion
+        const isoDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
         
         const dayData = this.monthlyData.filter(p => p.date === dateString)
         const completed = dayData.filter(p => p.completed).length
@@ -295,6 +320,7 @@ export default {
         
         this.monthlyCalendar.push({
           date: dateString,
+          isoDate: isoDate, // Add ISO date for reliable conversion
           dayNumber: day,
           hasData: dayData.length > 0,
           completed,
@@ -313,8 +339,18 @@ export default {
     },
 
     getZikrName(zikrId) {
-      const zikr = zikrData.find(z => z.id === zikrId)
-      return zikr ? zikr.latin : 'Unknown Zikr'
+      // Ensure zikrId is a number for comparison
+      const numericZikrId = parseInt(zikrId)
+      
+      // First try to find in loaded zikrs
+      let zikr = this.zikrs.find(z => z.id === numericZikrId)
+      
+      // If not found and zikrs array is empty, fallback to static data
+      if (!zikr && this.zikrs.length === 0) {
+        zikr = zikrData.find(z => z.id === numericZikrId)
+      }
+      
+      return zikr ? zikr.latin : `Unknown Zikr (ID: ${zikrId})`
     },
 
     formatDate(dateString) {
@@ -335,7 +371,8 @@ export default {
     },
 
     viewDayDetails(date) {
-      this.selectedDate = new Date(date).toISOString().split('T')[0]
+      // Use the ISO date directly to avoid timezone conversion issues
+      this.selectedDate = date
       this.currentView = 'daily'
       this.loadDailyData()
     }

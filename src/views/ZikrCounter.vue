@@ -68,10 +68,15 @@
 <script>
 import { zikrData } from '../data/zikrs'
 import { zikrDescriptions } from '../data/zikrDescriptions'
+import { useModal } from '@/composables/useModal'
 
 export default {
   name: 'ZikrCounter',
   props: ['id'],
+  setup() {
+    const { showConfirm } = useModal()
+    return { showConfirm }
+  },
   data() {
     return {
       currentZikr: {},
@@ -90,18 +95,46 @@ export default {
     }
   },
   mounted() {
-    this.initializeCounter()
+    this.loadZikrAndInitialize()
     this.focusCounter()
   },
   methods: {
-    initializeCounter() {
-      // Find the zikr by ID
-      this.currentZikr = zikrData.find(z => z.id === parseInt(this.id))
-      if (!this.currentZikr) {
-        this.$router.push('/app')
-        return
+    async loadZikrAndInitialize() {
+      try {
+        // First try to load from API
+        const response = await fetch('/api/zikrs')
+        const data = await response.json()
+        
+        let zikrs = []
+        if (data.success) {
+          zikrs = data.data
+        } else {
+          // Fallback to local data
+          zikrs = zikrData
+        }
+        
+        // Find the zikr by ID
+        this.currentZikr = zikrs.find(z => z.id === parseInt(this.id))
+        if (!this.currentZikr) {
+          this.$router.push('/zikrs')
+          return
+        }
+        
+        this.initializeCounter()
+      } catch (error) {
+        console.error('Error loading zikr:', error)
+        // Fallback to local data
+        this.currentZikr = zikrData.find(z => z.id === parseInt(this.id))
+        if (!this.currentZikr) {
+          this.$router.push('/zikrs')
+          return
+        }
+        
+        this.initializeCounter()
       }
+    },
 
+    initializeCounter() {
       // Get target count from query or use default
       this.targetCount = parseInt(this.$route.query.repetitions) || this.currentZikr.defaultRepetitions
 
@@ -144,8 +177,18 @@ export default {
       }
     },
 
-    resetCounter() {
-      if (confirm(this.$t('zikr.confirmReset'))) {
+    async resetCounter() {
+      const confirmed = await this.showConfirm(
+        this.$t('zikr.confirmReset'),
+        { 
+          type: 'warning', 
+          title: this.$t('zikr.reset') || 'Reset Counter',
+          confirmText: this.$t('zikr.reset') || 'Reset',
+          cancelText: this.$t('zikr.cancel') || 'Cancel'
+        }
+      )
+      
+      if (confirmed) {
         this.currentCount = 0
         this.saveProgress()
       }
@@ -199,16 +242,26 @@ export default {
       sessions.push(sessionData)
       localStorage.setItem('zikrSessions', JSON.stringify(sessions))
 
-      this.$router.push('/app')
+      this.$router.push('/zikrs')
     },
 
-    goBack() {
+    async goBack() {
       if (this.currentCount > 0) {
-        if (confirm(this.$t('zikr.confirmExit'))) {
+        const confirmed = await this.showConfirm(
+          this.$t('zikr.confirmExit'),
+          { 
+            type: 'warning', 
+            title: this.$t('zikr.exitConfirm') || 'Exit Confirmation',
+            confirmText: this.$t('zikr.saveAndExit') || 'Save & Exit',
+            cancelText: this.$t('zikr.cancel') || 'Cancel'
+          }
+        )
+        
+        if (confirmed) {
           this.saveAndExit()
         }
       } else {
-        this.$router.push('/app')
+        this.$router.push('/zikrs')
       }
     },
 
