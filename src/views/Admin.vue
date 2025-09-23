@@ -248,7 +248,7 @@ import { useRouter } from 'vue-router'
 export default {
   name: 'AdminPanel',
   setup() {
-    const { user, logout } = useAuth()
+    const { user, logout, getAuthHeaders } = useAuth()
     const router = useRouter()
 
     const handleLogout = async () => {
@@ -258,7 +258,8 @@ export default {
 
     return {
       user,
-      handleLogout
+      handleLogout,
+      getAuthHeaders
     }
   },
   data() {
@@ -294,13 +295,40 @@ export default {
     this.loadAnalytics()
   },
   methods: {
-    loadZikrs() {
-      // In production, this would fetch from your API
-      this.zikrs = [...zikrData]
+    async loadZikrs() {
+      try {
+        const response = await fetch('/api/zikrs')
+        const data = await response.json()
+        if (data.success) {
+          this.zikrs = data.data
+        } else {
+          console.error('Failed to load zikrs:', data.message)
+          // Fallback to local data
+          this.zikrs = [...zikrData]
+        }
+      } catch (error) {
+        console.error('Error loading zikrs:', error)
+        // Fallback to local data
+        this.zikrs = [...zikrData]
+      }
     },
 
-    loadTranslations() {
-      this.currentTranslations = { ...zikrDescriptions[this.selectedLanguage] }
+    async loadTranslations() {
+      try {
+        const response = await fetch(`/api/translations?lang=${this.selectedLanguage}`)
+        const data = await response.json()
+        if (data.success) {
+          this.currentTranslations = data.data
+        } else {
+          console.error('Failed to load translations:', data.message)
+          // Fallback to local data
+          this.currentTranslations = { ...zikrDescriptions[this.selectedLanguage] }
+        }
+      } catch (error) {
+        console.error('Error loading translations:', error)
+        // Fallback to local data
+        this.currentTranslations = { ...zikrDescriptions[this.selectedLanguage] }
+      }
       this.translationsDirty = false
     },
 
@@ -308,13 +336,31 @@ export default {
       this.translationsDirty = true
     },
 
-    saveTranslations() {
-      // In production, this would save to your API
-      // For now, just update the local data
-      zikrDescriptions[this.selectedLanguage] = { ...this.currentTranslations }
-      localStorage.setItem(`zikrDescriptions_${this.selectedLanguage}`, JSON.stringify(this.currentTranslations))
-      this.translationsDirty = false
-      alert(this.$t('admin.translationsSaved'))
+    async saveTranslations() {
+      try {
+        const response = await fetch('/api/translations', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...this.getAuthHeaders()
+          },
+          body: JSON.stringify({
+            language: this.selectedLanguage,
+            translations: this.currentTranslations
+          })
+        })
+        
+        const data = await response.json()
+        if (data.success) {
+          this.translationsDirty = false
+          alert(this.$t('admin.translationsSaved') || 'Translations saved successfully!')
+        } else {
+          alert(`Failed to save translations: ${data.message}`)
+        }
+      } catch (error) {
+        console.error('Error saving translations:', error)
+        alert('Failed to save translations. Please try again.')
+      }
     },
 
     editZikr(zikr) {
@@ -333,31 +379,57 @@ export default {
       }
     },
 
-    saveZikr() {
-      if (this.editingZikr) {
-        // Update existing zikr
-        const index = this.zikrs.findIndex(z => z.id === this.editingZikr.id)
-        if (index !== -1) {
-          this.zikrs[index] = { ...this.zikrForm, id: this.editingZikr.id }
+    async saveZikr() {
+      try {
+        const method = this.editingZikr ? 'PUT' : 'POST'
+        const url = this.editingZikr ? `/api/zikrs/${this.editingZikr.id}` : '/api/zikrs'
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            ...this.getAuthHeaders()
+          },
+          body: JSON.stringify(this.zikrForm)
+        })
+        
+        const data = await response.json()
+        if (data.success) {
+          // Reload zikrs to get updated data
+          await this.loadZikrs()
+          this.closeZikrModal()
+          alert(this.$t('admin.zikrSaved') || 'Zikr saved successfully!')
+        } else {
+          alert(`Failed to save zikr: ${data.message}`)
         }
-      } else {
-        // Add new zikr
-        const newId = Math.max(...this.zikrs.map(z => z.id)) + 1
-        this.zikrs.push({ ...this.zikrForm, id: newId })
+      } catch (error) {
+        console.error('Error saving zikr:', error)
+        alert('Failed to save zikr. Please try again.')
       }
-      
-      // In production, this would save to your API
-      localStorage.setItem('adminZikrs', JSON.stringify(this.zikrs))
-      this.closeZikrModal()
-      alert(this.$t('admin.zikrSaved'))
     },
 
-    deleteZikr(id) {
-      if (confirm(this.$t('admin.confirmDeleteZikr'))) {
-        this.zikrs = this.zikrs.filter(z => z.id !== id)
-        // In production, this would delete from your API
-        localStorage.setItem('adminZikrs', JSON.stringify(this.zikrs))
-        alert(this.$t('admin.zikrDeleted'))
+    async deleteZikr(id) {
+      if (confirm(this.$t('admin.confirmDeleteZikr') || 'Are you sure you want to delete this zikr?')) {
+        try {
+          const response = await fetch(`/api/zikrs/${id}`, {
+            method: 'DELETE',
+            headers: {
+              ...this.getAuthHeaders()
+            }
+          })
+          
+          const data = await response.json()
+          if (data.success) {
+            // Reload zikrs to get updated data
+            await this.loadZikrs()
+            alert(this.$t('admin.zikrDeleted') || 'Zikr deleted successfully!')
+          } else {
+            alert(`Failed to delete zikr: ${data.message}`)
+          }
+        } catch (error) {
+          console.error('Error deleting zikr:', error)
+          alert('Failed to delete zikr. Please try again.')
+        }
       }
     },
 

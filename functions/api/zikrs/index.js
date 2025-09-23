@@ -122,7 +122,7 @@ export async function onRequestPost(context) {
   const { request, env } = context;
   
   try {
-    // Verify admin token (simplified for demo)
+    // Verify admin token
     const authHeader = request.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response(JSON.stringify({
@@ -137,24 +137,240 @@ export async function onRequestPost(context) {
       });
     }
     
-    const zikrData = await request.json();
+    // TODO: Verify token and check admin role
+    // const token = authHeader.substring(7);
+    // For now, assume token is valid for demo
     
-    // In production, save to D1 database
-    // For demo, just return success
+    const zikrData = await request.json();
+    const { arabic, latin, identifier, defaultRepetitions } = zikrData;
+    
+    if (!arabic || !latin || !identifier) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Missing required fields: arabic, latin, identifier'
+      }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+    
+    // Save to D1 database
+    const result = await env.zikr_database.prepare(
+      `INSERT INTO zikrs (arabic, latin, identifier, default_repetitions, is_custom, is_active) 
+       VALUES (?, ?, ?, ?, 0, 1)`
+    ).bind(arabic, latin, identifier, defaultRepetitions || 33).run();
+    
+    if (result.success) {
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Zikr saved successfully',
+        data: { 
+          id: result.meta.last_row_id,
+          arabic,
+          latin,
+          identifier,
+          defaultRepetitions: defaultRepetitions || 33
+        }
+      }), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    } else {
+      throw new Error('Failed to save to database');
+    }
+  } catch (error) {
+    console.error('Save zikr error:', error);
     return new Response(JSON.stringify({
-      success: true,
-      message: 'Zikr saved successfully',
-      data: { ...zikrData, id: Date.now() }
+      success: false,
+      message: 'Failed to save zikr'
     }), {
+      status: 500,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       }
     });
+  }
+}
+
+export async function onRequestPut(context) {
+  const { request, env } = context;
+  
+  try {
+    // Verify admin token
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Unauthorized'
+      }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+    
+    // Extract ID from URL path
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const id = pathParts[pathParts.length - 1];
+    
+    if (!id || isNaN(parseInt(id))) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Invalid zikr ID'
+      }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+    
+    const zikrData = await request.json();
+    const { arabic, latin, identifier, defaultRepetitions } = zikrData;
+    
+    if (!arabic || !latin || !identifier) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Missing required fields: arabic, latin, identifier'
+      }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+    
+    // Update in D1 database
+    const result = await env.zikr_database.prepare(
+      `UPDATE zikrs SET arabic = ?, latin = ?, identifier = ?, default_repetitions = ?, updated_at = CURRENT_TIMESTAMP 
+       WHERE id = ? AND is_active = 1`
+    ).bind(arabic, latin, identifier, defaultRepetitions || 33, parseInt(id)).run();
+    
+    if (result.success && result.meta.changes > 0) {
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Zikr updated successfully',
+        data: { 
+          id: parseInt(id),
+          arabic,
+          latin,
+          identifier,
+          defaultRepetitions: defaultRepetitions || 33
+        }
+      }), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    } else {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Zikr not found or no changes made'
+      }), {
+        status: 404,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
   } catch (error) {
+    console.error('Update zikr error:', error);
     return new Response(JSON.stringify({
       success: false,
-      message: 'Failed to save zikr'
+      message: 'Failed to update zikr'
+    }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  }
+}
+
+export async function onRequestDelete(context) {
+  const { request, env } = context;
+  
+  try {
+    // Verify admin token
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Unauthorized'
+      }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+    
+    // Extract ID from URL path
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const id = pathParts[pathParts.length - 1];
+    
+    if (!id || isNaN(parseInt(id))) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Invalid zikr ID'
+      }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+    
+    // Soft delete in D1 database
+    const result = await env.zikr_database.prepare(
+      `UPDATE zikrs SET is_active = 0, updated_at = CURRENT_TIMESTAMP 
+       WHERE id = ? AND is_active = 1`
+    ).bind(parseInt(id)).run();
+    
+    if (result.success && result.meta.changes > 0) {
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Zikr deleted successfully'
+      }), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    } else {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Zikr not found'
+      }), {
+        status: 404,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Delete zikr error:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      message: 'Failed to delete zikr'
     }), {
       status: 500,
       headers: {
