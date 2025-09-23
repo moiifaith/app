@@ -94,17 +94,21 @@
         </div>
 
         <div class="translations-editor">
-          <div class="translation-group">
-            <h3>{{ $t('admin.zikrDescriptions') }}</h3>
+          <div 
+            v-for="(group, groupKey) in groupedTranslations" 
+            :key="groupKey"
+            class="translation-group"
+          >
+            <h3>{{ formatGroupTitle(groupKey) }}</h3>
             <div class="translation-items">
               <div 
-                v-for="(description, key) in currentTranslations" 
+                v-for="(translation, key) in group" 
                 :key="key"
                 class="translation-item"
               >
                 <label>{{ key }}</label>
                 <textarea 
-                  v-model="currentTranslations[key]"
+                  v-model="group[key]"
                   @input="markTranslationsDirty"
                   rows="3"
                 ></textarea>
@@ -304,6 +308,36 @@ export default {
       maxDailyActivity: 1
     }
   },
+  computed: {
+    groupedTranslations() {
+      const grouped = {};
+      
+      // If currentTranslations is flat (just strings), put them under a general group
+      const hasNestedStructure = Object.values(this.currentTranslations).some(value => 
+        typeof value === 'object' && value !== null
+      );
+      
+      if (!hasNestedStructure) {
+        // Flat structure - group under "General" or "Zikr Descriptions"
+        grouped['zikrDescriptions'] = this.currentTranslations;
+      } else {
+        // Nested structure - use the existing groups
+        Object.entries(this.currentTranslations).forEach(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            grouped[key] = value;
+          } else {
+            // Top-level strings go in a "general" group
+            if (!grouped['general']) {
+              grouped['general'] = {};
+            }
+            grouped['general'][key] = value;
+          }
+        });
+      }
+      
+      return grouped;
+    }
+  },
   mounted() {
     this.loadZikrs()
     this.loadTranslations()
@@ -311,6 +345,23 @@ export default {
     this.loadAnalytics()
   },
   methods: {
+    formatGroupTitle(groupKey) {
+      const titleMap = {
+        'auth': 'Authentication',
+        'zikr': 'Zikr App',
+        'admin': 'Admin Panel',
+        'general': 'General',
+        'zikrDescriptions': 'Zikr Descriptions'
+      };
+      
+      return titleMap[groupKey] || groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
+    },
+
+    hasNestedStructure() {
+      return Object.values(this.currentTranslations).some(value => 
+        typeof value === 'object' && value !== null
+      );
+    },
     async loadZikrs() {
       try {
         const response = await fetch('/api/zikrs')
@@ -354,6 +405,22 @@ export default {
 
     async saveTranslations() {
       try {
+        // Rebuild the nested structure from grouped translations
+        const translationsToSave = {};
+        
+        Object.entries(this.groupedTranslations).forEach(([groupKey, group]) => {
+          if (groupKey === 'general') {
+            // General items go to top level
+            Object.assign(translationsToSave, group);
+          } else if (groupKey === 'zikrDescriptions' && !this.hasNestedStructure()) {
+            // If it's flat structure, save directly
+            Object.assign(translationsToSave, group);
+          } else {
+            // Nested structure
+            translationsToSave[groupKey] = group;
+          }
+        });
+        
         const response = await fetch('/api/translations', {
           method: 'PUT',
           headers: {
@@ -362,12 +429,14 @@ export default {
           },
           body: JSON.stringify({
             language: this.selectedLanguage,
-            translations: this.currentTranslations
+            translations: translationsToSave
           })
         })
         
         const data = await response.json()
         if (data.success) {
+          // Update the current translations with the saved structure
+          this.currentTranslations = translationsToSave;
           this.translationsDirty = false
           await this.showAlert(
             this.$t('admin.translationsSaved') || 'Translations saved successfully!',
@@ -798,9 +867,21 @@ export default {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.translation-group {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  border: 1px solid #dee2e6;
+}
+
 .translation-group h3 {
   margin: 0 0 20px 0;
   color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e9ecef;
 }
 
 .translation-items {
