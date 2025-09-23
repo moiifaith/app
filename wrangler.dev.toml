@@ -1,0 +1,14 @@
+name = "zikr-app"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+# Local development D1 database binding
+[[d1_databases]]
+binding = "zikr_database"
+database_name = "zikr-database"
+database_id = "fde30fbc-0328-4f67-8145-686d24687832"
+
+# Environment variables for development
+[vars]
+ENVIRONMENT = "development"

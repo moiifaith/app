@@ -1,5 +1,17 @@
--- Cloudflare D1 Database Schema for Zikr App v2.0
+-- Migration script to update database schema
+-- Drop existing tables to avoid conflicts
+DROP TABLE IF EXISTS user_preferences;
+DROP TABLE IF EXISTS user_sessions;
+DROP TABLE IF EXISTS user_progress;
+DROP TABLE IF EXISTS admin_users;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS zikrs;
+DROP TABLE IF EXISTS languages;
+DROP TABLE IF EXISTS translation_versions;
+DROP TABLE IF EXISTS zikr_sessions;
+DROP TABLE IF EXISTS translations;
 
+-- Now create the new schema
 -- Users table with authentication and roles
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
