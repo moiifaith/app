@@ -16,19 +16,31 @@ wrangler login
 
 ### 3. Create D1 Database (CRITICAL!)
 ```bash
+# Production database
 wrangler d1 create zikr-database
+
+# Preview database (optional, for testing)
+wrangler d1 create zikr-database-preview
 ```
 **📋 Copy the `database_id` from output and update `wrangler.toml`**
 
 ### 4. Create KV Namespace for Translations
 ```bash
+# Production KV namespace
 wrangler kv:namespace create TRANSLATIONS
+
+# Preview KV namespace (optional)
+wrangler kv:namespace create TRANSLATIONS --preview
 ```
 **📋 Copy the `id` from output and update `wrangler.toml`**
 
 ### 5. Initialize Database with Zikrs
 ```bash
+# Initialize production database
 wrangler d1 execute zikr-database --file=./functions/schema.sql
+
+# Initialize preview database (if created)
+wrangler d1 execute zikr-database-preview --file=./functions/schema.sql
 ```
 
 ### 6. Deploy to Cloudflare Pages

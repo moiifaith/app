@@ -18,16 +18,16 @@ id = "YOUR_KV_NAMESPACE_ID_HERE"
 [env.production.vars]
 ENVIRONMENT = "production"
 
-# Local development environment
-[env.development]
-[[env.development.d1_databases]]
+# Preview/staging environment
+[env.preview]
+[[env.preview.d1_databases]]
 binding = "DB"
-database_name = "zikr-database-dev"
-database_id = "YOUR_DEV_DATABASE_ID_HERE"
+database_name = "zikr-database-preview"
+database_id = "YOUR_PREVIEW_DATABASE_ID_HERE"
 
-[[env.development.kv_namespaces]]
+[[env.preview.kv_namespaces]]
 binding = "TRANSLATIONS"
-id = "YOUR_DEV_KV_NAMESPACE_ID_HERE"
+id = "YOUR_PREVIEW_KV_NAMESPACE_ID_HERE"
 
-[env.development.vars]
-ENVIRONMENT = "development"
+[env.preview.vars]
+ENVIRONMENT = "preview"

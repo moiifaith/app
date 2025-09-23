@@ -134,17 +134,17 @@ After deployment, test these URLs:
 
 ## Environment-Specific Deployment
 
-### Development Environment
+### Preview Environment
 
 ```bash
-# Create dev database
-wrangler d1 create zikr-database-dev
+# Create preview database
+wrangler d1 create zikr-database-preview
 
-# Create dev KV namespace
-wrangler kv:namespace create TRANSLATIONS --env development
+# Create preview KV namespace
+wrangler kv:namespace create TRANSLATIONS --preview
 
-# Deploy to dev environment
-wrangler pages deploy dist --env development
+# Deploy to preview environment
+wrangler pages deploy dist --env preview
 ```
 
 ### Production Environment
