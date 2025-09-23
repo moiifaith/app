@@ -14,13 +14,41 @@
   },
   "language": {
     "current": "Jezik",
-    "english": "English",
-    "arabic": "العربية",
-    "spanish": "Español",
-    "french": "Français",
+    "english": "Engleski",
+    "spanish": "Španski",
+    "french": "Francuski",
     "bosnian": "Bosanski",
     "croatian": "Hrvatski",
-    "serbian": "Српски"
+    "serbian": "Srpski",
+    "arabic": "Arapski"
+  },
+  "auth": {
+    "login": {
+      "title": "Prijava",
+      "subtitle": "Dobrodošli! Molimo unesite vaše podatke",
+      "button": "Prijavite se"
+    },
+    "register": {
+      "title": "Kreiraj račun",
+      "subtitle": "Pridružite se i započnite svoje duhovno putovanje",
+      "button": "Registruj se",
+      "migrateData": "Importuj moj postojeći napredak"
+    },
+    "email": "Email",
+    "password": "Lozinka",
+    "confirmPassword": "Potvrdi lozinku",
+    "name": "Puno ime",
+    "emailPlaceholder": "Unesite vaš email",
+    "passwordPlaceholder": "Unesite vašu lozinku",
+    "confirmPasswordPlaceholder": "Potvrdite vašu lozinku",
+    "namePlaceholder": "Unesite vaše puno ime",
+    "signingIn": "Prijavljivanje...",
+    "registering": "Kreiranje računa...",
+    "alreadyHaveAccount": "Već imate račun?",
+    "noAccount": "Nemate račun?",
+    "backToApp": "Nazad na aplikaciju",
+    "logout": "Odjava",
+    "profile": "Profil"
   },
   "zikr": {
     "appName": "Brojač Zikra",
@@ -69,14 +97,34 @@
     "delete": "Obriši"
   },
   "auth": {
-    "register": "Registruj se",
-    "login": "Prijavite se",
-    "logout": "Odjavite se",
+    "login": {
+      "title": "Prijava",
+      "subtitle": "Dobrodošli! Molimo unesite vaše podatke",
+      "button": "Prijavite se"
+    },
+    "register": {
+      "title": "Kreiraj račun",
+      "subtitle": "Pridružite se i započnite svoje duhovno putovanje",
+      "button": "Registruj se",
+      "migrateData": "Importuj moj postojeći napredak"
+    },
     "email": "Email",
+    "password": "Lozinka",
+    "confirmPassword": "Potvrdi lozinku",
+    "name": "Puno ime",
+    "emailPlaceholder": "Unesite vaš email",
+    "passwordPlaceholder": "Unesite vašu lozinku",
+    "confirmPasswordPlaceholder": "Potvrdite vašu lozinku",
+    "namePlaceholder": "Unesite vaše puno ime",
+    "signingIn": "Prijavljivanje...",
+    "registering": "Kreiranje računa...",
+    "alreadyHaveAccount": "Već imate račun?",
+    "noAccount": "Nemate račun?",
+    "backToApp": "Nazad na aplikaciju",
+    "logout": "Odjava",
+    "profile": "Profil",
     "firstName": "Ime",
     "lastName": "Prezime",
-    "confirmPassword": "Potvrdite lozinku",
-    "alreadyHaveAccount": "Već imate račun?",
     "dontHaveAccount": "Nemate račun?",
     "registerNow": "Registrujte se sada",
     "loginNow": "Prijavite se sada"

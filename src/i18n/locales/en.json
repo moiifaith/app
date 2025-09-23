@@ -32,7 +32,39 @@
     "current": "Language",
     "english": "English",
     "spanish": "Spanish",
-    "french": "French"
+    "french": "French",
+    "bosnian": "Bosnian",
+    "croatian": "Croatian",
+    "serbian": "Serbian",
+    "arabic": "Arabic"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Welcome back! Please enter your details",
+      "button": "Sign In"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join us and start your spiritual journey",
+      "button": "Sign Up",
+      "migrateData": "Import my existing progress"
+    },
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "namePlaceholder": "Enter your full name",
+    "signingIn": "Signing in...",
+    "registering": "Creating account...",
+    "alreadyHaveAccount": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "backToApp": "Back to App",
+    "logout": "Sign Out",
+    "profile": "Profile"
   },
   "zikr": {
     "appName": "Zikr Counter",

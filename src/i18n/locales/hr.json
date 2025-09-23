@@ -14,13 +14,13 @@
   },
   "language": {
     "current": "Jezik",
-    "english": "English",
-    "arabic": "العربية",
-    "spanish": "Español",
-    "french": "Français",
+    "english": "Engleski",
+    "spanish": "Španjolski",
+    "french": "Francuski",
     "bosnian": "Bosanski",
     "croatian": "Hrvatski",
-    "serbian": "Српски"
+    "serbian": "Srpski",
+    "arabic": "Arapski"
   },
   "zikr": {
     "appName": "Brojač Zikra",
@@ -69,14 +69,34 @@
     "delete": "Obriši"
   },
   "auth": {
-    "register": "Registriraj se",
-    "login": "Prijavite se",
-    "logout": "Odjavite se",
+    "login": {
+      "title": "Prijava",
+      "subtitle": "Dobrodošli! Molimo unesite vaše podatke",
+      "button": "Prijavite se"
+    },
+    "register": {
+      "title": "Stvori račun",
+      "subtitle": "Pridružite se i započnite svoj duhovni put",
+      "button": "Registriraj se",
+      "migrateData": "Uvezi moj postojeći napredak"
+    },
     "email": "Email",
+    "password": "Lozinka",
+    "confirmPassword": "Potvrdi lozinku",
+    "name": "Puno ime",
+    "emailPlaceholder": "Unesite vaš email",
+    "passwordPlaceholder": "Unesite vašu lozinku",
+    "confirmPasswordPlaceholder": "Potvrdite vašu lozinku",
+    "namePlaceholder": "Unesite vaše puno ime",
+    "signingIn": "Prijavljivanje...",
+    "registering": "Stvaranje računa...",
+    "alreadyHaveAccount": "Već imate račun?",
+    "noAccount": "Nemate račun?",
+    "backToApp": "Natrag na aplikaciju",
+    "logout": "Odjava",
+    "profile": "Profil",
     "firstName": "Ime",
     "lastName": "Prezime",
-    "confirmPassword": "Potvrdite lozinku",
-    "alreadyHaveAccount": "Već imate račun?",
     "dontHaveAccount": "Nemate račun?",
     "registerNow": "Registrirajte se sada",
     "loginNow": "Prijavite se sada"

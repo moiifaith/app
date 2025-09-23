@@ -5,9 +5,19 @@
       <div class="hero-content">
         <h1>{{ $t('zikr.appName') }}</h1>
         <p class="hero-subtitle">{{ $t('zikr.appDescription') }}</p>
-        <router-link to="/app" class="cta-button">
-          {{ $t('zikr.startZikr') }}
-        </router-link>
+        <div class="hero-actions" v-if="!isAuthenticated">
+          <router-link to="/register" class="cta-button primary">
+            {{ $t('auth.register.button') }}
+          </router-link>
+          <router-link to="/login" class="cta-button secondary">
+            {{ $t('auth.login.button') }}
+          </router-link>
+        </div>
+        <div class="hero-actions" v-else>
+          <router-link to="/zikr-app" class="cta-button primary">
+            {{ $t('zikr.startZikr') }}
+          </router-link>
+        </div>
       </div>
       <div class="hero-image">
         <img src="../assets/zikr-hero-placeholder.png" alt="Zikr App Preview" />
@@ -69,7 +79,15 @@
       <div class="container">
         <h2>{{ $t('zikr.finalCtaTitle') }}</h2>
         <p>{{ $t('zikr.finalCtaDescription') }}</p>
-        <router-link to="/app" class="cta-button large">
+        <div class="final-cta-actions" v-if="!isAuthenticated">
+          <router-link to="/register" class="cta-button large primary">
+            {{ $t('auth.register.button') }}
+          </router-link>
+          <router-link to="/login" class="cta-button large secondary">
+            {{ $t('auth.login.button') }}
+          </router-link>
+        </div>
+        <router-link v-else to="/zikr-app" class="cta-button large primary">
           {{ $t('zikr.startNow') }}
         </router-link>
       </div>
@@ -78,8 +96,17 @@
 </template>
 
 <script>
+import { useAuth } from '@/composables/useAuth'
+
 export default {
-  name: 'LandingPage'
+  name: 'LandingPage',
+  setup() {
+    const { isAuthenticated } = useAuth()
+    
+    return {
+      isAuthenticated
+    }
+  }
 }
 </script>
 
@@ -137,6 +164,12 @@ export default {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
+.hero-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
 .cta-button {
   display: inline-block;
   background: #ff6b6b;
@@ -150,15 +183,31 @@ export default {
   box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
 }
 
+.cta-button.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.cta-button.secondary {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  box-shadow: none;
+}
+
+.cta-button.secondary:hover {
+  background: white;
+  color: #667eea;
+}
+
 .cta-button:hover {
   background: #ff5252;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }
 
-.cta-button.large {
-  padding: 18px 40px;
-  font-size: 1.2rem;
+.cta-button.primary:hover {
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 /* Features Section */
@@ -263,6 +312,13 @@ export default {
   font-size: 1.2rem;
   margin-bottom: 40px;
   opacity: 0.9;
+}
+
+.final-cta-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 /* Responsive Design */
