@@ -1,34 +1,30 @@
 <template>
   <div id="app">
-    <nav class="navbar">
+    <!-- Only show navbar on landing page -->
+    <nav v-if="showNavbar" class="navbar">
       <div class="nav-container">
         <router-link to="/" class="nav-logo">
-          Moii.Faith
+          Zikr Counter
         </router-link>
         
         <div class="nav-menu">
-          <router-link to="/" class="nav-link">
-            {{ $t('navigation.home') }}
-          </router-link>
-          <router-link to="/about" class="nav-link">
-            {{ $t('navigation.about') }}
-          </router-link>
-          <router-link to="/profile" class="nav-link">
-            {{ $t('navigation.profile') }}
+          <router-link to="/app" class="nav-link app-link">
+            Open App
           </router-link>
           
           <div class="language-selector">
             <select @change="changeLanguage" :value="currentLanguage">
-              <option value="en">{{ $t('language.english') }}</option>
-              <option value="es">{{ $t('language.spanish') }}</option>
-              <option value="fr">{{ $t('language.french') }}</option>
+              <option value="en">English</option>
+              <option value="ar">العربية</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
             </select>
           </div>
         </div>
       </div>
     </nav>
     
-    <main class="main-content">
+    <main class="main-content" :class="{ 'no-navbar': !showNavbar }">
       <router-view/>
     </main>
   </div>
@@ -42,6 +38,12 @@ export default {
   data() {
     return {
       currentLanguage: getCurrentLanguage()
+    }
+  },
+  computed: {
+    showNavbar() {
+      // Only show navbar on landing page
+      return this.$route.path === '/'
     }
   },
   methods: {
@@ -94,7 +96,7 @@ body {
 .nav-logo {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #3498db;
+  color: #667eea;
   text-decoration: none;
 }
 
@@ -108,12 +110,23 @@ body {
   color: #2c3e50;
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.3s;
+  transition: all 0.3s;
+  padding: 8px 16px;
+  border-radius: 20px;
 }
 
-.nav-link:hover,
-.nav-link.router-link-active {
-  color: #3498db;
+.nav-link:hover {
+  color: #667eea;
+}
+
+.app-link {
+  background: #667eea;
+  color: white !important;
+}
+
+.app-link:hover {
+  background: #5a6fd8;
+  color: white !important;
 }
 
 .language-selector select {
@@ -127,7 +140,10 @@ body {
 
 .main-content {
   min-height: calc(100vh - 80px);
-  padding: 20px 0;
+}
+
+.main-content.no-navbar {
+  min-height: 100vh;
 }
 
 @media (max-width: 768px) {

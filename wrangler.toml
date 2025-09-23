@@ -1,0 +1,33 @@
+name = "zikr-app"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
+
+[env.production]
+# D1 Database binding (you'll get the database_id after creating the database)
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "zikr-database"
+database_id = "YOUR_DATABASE_ID_HERE"
+
+# KV Namespace for translations (you'll get the id after creating the namespace)
+[[env.production.kv_namespaces]]
+binding = "TRANSLATIONS"
+id = "YOUR_KV_NAMESPACE_ID_HERE"
+
+# Environment variables for production
+[env.production.vars]
+ENVIRONMENT = "production"
+
+# Local development environment
+[env.development]
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "zikr-database-dev"
+database_id = "YOUR_DEV_DATABASE_ID_HERE"
+
+[[env.development.kv_namespaces]]
+binding = "TRANSLATIONS"
+id = "YOUR_DEV_KV_NAMESPACE_ID_HERE"
+
+[env.development.vars]
+ENVIRONMENT = "development"

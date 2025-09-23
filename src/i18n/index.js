@@ -1,12 +1,16 @@
 import { createI18n } from 'vue-i18n'
 import en from './locales/en.json'
+import ar from './locales/ar.json'
 import es from './locales/es.json'
 import fr from './locales/fr.json'
 
 // Get the browser language or fallback to 'en'
 function getDefaultLocale() {
+  const savedLang = localStorage.getItem('language')
+  if (savedLang) return savedLang
+  
   const browserLang = navigator.language || navigator.userLanguage
-  const supportedLocales = ['en', 'es', 'fr']
+  const supportedLocales = ['en', 'ar', 'es', 'fr']
   
   // Check if browser language matches any supported locale
   for (const locale of supportedLocales) {
@@ -20,6 +24,7 @@ function getDefaultLocale() {
 
 const messages = {
   en,
+  ar,
   es,
   fr
 }
