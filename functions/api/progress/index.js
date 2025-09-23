@@ -1,27 +1,18 @@
 // User progress tracking endpoint
+// Note: This app uses localStorage for progress tracking, not database storage
 export async function onRequestPost(context) {
-  const { request, env } = context;
+  const { request } = context;
   
   try {
     const progressData = await request.json();
     
-    // In production, save to D1 database with user identification
-    // For demo, just return success
-    
-    // Example D1 query would be:
-    // await env.DB.prepare(
-    //   "INSERT INTO user_progress (user_id, zikr_id, count, date, completed) VALUES (?, ?, ?, ?, ?)"
-    // ).bind(
-    //   progressData.userId,
-    //   progressData.zikrId,
-    //   progressData.count,
-    //   progressData.date,
-    //   progressData.completed
-    // ).run();
+    // Since this app uses localStorage, just acknowledge the request
+    // The actual storage happens client-side in localStorage
     
     return new Response(JSON.stringify({
       success: true,
-      message: 'Progress saved successfully'
+      message: 'Progress acknowledged (stored locally in browser)',
+      note: 'This app uses localStorage for progress tracking'
     }), {
       headers: {
         'Content-Type': 'application/json',
@@ -31,7 +22,7 @@ export async function onRequestPost(context) {
   } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      message: 'Failed to save progress'
+      message: 'Failed to process progress data'
     }), {
       status: 500,
       headers: {
@@ -43,22 +34,20 @@ export async function onRequestPost(context) {
 }
 
 export async function onRequestGet(context) {
-  const { request, env } = context;
+  const { request } = context;
   const url = new URL(request.url);
   const userId = url.searchParams.get('userId');
   const date = url.searchParams.get('date');
   
   try {
-    // In production, fetch from D1 database
-    // Example query:
-    // const result = await env.DB.prepare(
-    //   "SELECT * FROM user_progress WHERE user_id = ? AND date = ?"
-    // ).bind(userId, date).all();
+    // Since this app uses localStorage, return empty data
+    // The actual data retrieval happens client-side from localStorage
     
-    // For demo, return empty array
     return new Response(JSON.stringify({
       success: true,
-      data: []
+      data: [],
+      message: 'Progress data is stored locally in browser',
+      note: 'This app uses localStorage for progress tracking'
     }), {
       headers: {
         'Content-Type': 'application/json',

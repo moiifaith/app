@@ -1,8 +1,4 @@
 import { createI18n } from 'vue-i18n'
-import en from './locales/en.json'
-import ar from './locales/ar.json'
-import es from './locales/es.json'
-import fr from './locales/fr.json'
 
 // Get the browser language or fallback to 'en'
 function getDefaultLocale() {
@@ -22,12 +18,26 @@ function getDefaultLocale() {
   return 'en' // fallback
 }
 
-const messages = {
-  en,
-  ar,
-  es,
-  fr
+// Function to load translations from API
+async function loadTranslations(locale) {
+  try {
+    const response = await fetch(`/api/translations?lang=${locale}`)
+    const data = await response.json()
+    
+    if (data.success) {
+      return data.data
+    } else {
+      console.error('Failed to load translations:', data.message)
+      return {}
+    }
+  } catch (error) {
+    console.error('Error fetching translations:', error)
+    return {}
+  }
 }
+
+// Initialize with empty messages - will be loaded dynamically
+const messages = {}
 
 const i18n = createI18n({
   legacy: false, // you must set `false`, to use Composition API
@@ -37,20 +47,49 @@ const i18n = createI18n({
   globalInjection: true // make $t available in all components
 })
 
+// Load initial translations
+async function initializeTranslations() {
+  const defaultLocale = getDefaultLocale()
+  const translations = await loadTranslations(defaultLocale)
+  i18n.global.setLocaleMessage(defaultLocale, translations)
+}
+
+// Initialize translations when the module loads
+initializeTranslations()
+
 export default i18n
 
 // Export function to change language
-export function setLanguage(locale) {
+export async function setLanguage(locale) {
+  // Load translations for the new locale if not already loaded
+  if (!i18n.global.availableLocales.includes(locale)) {
+    const translations = await loadTranslations(locale)
+    i18n.global.setLocaleMessage(locale, translations)
+  }
+  
   i18n.global.locale.value = locale
   localStorage.setItem('language', locale)
+}
+
+// Export function to get available languages from API
+export async function getAvailableLanguages() {
+  try {
+    const response = await fetch('/api/languages')
+    const data = await response.json()
+    
+    if (data.success) {
+      return data.data
+    } else {
+      console.error('Failed to load languages:', data.message)
+      return []
+    }
+  } catch (error) {
+    console.error('Error fetching languages:', error)
+    return []
+  }
 }
 
 // Export function to get current language
 export function getCurrentLanguage() {
   return i18n.global.locale.value
-}
-
-// Export function to get available languages
-export function getAvailableLanguages() {
-  return Object.keys(messages)
 }
