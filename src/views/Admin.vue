@@ -2,14 +2,14 @@
   <div class="admin-panel">
     <header class="admin-header">
       <div class="header-left">
-        <h1>{{ $t('admin.adminPanel') || 'Admin Panel' }}</h1>
+        <h1>{{ $t('admin.adminPanel') }}</h1>
         <router-link to="/zikr-app" class="back-to-app-btn">
-          ← {{ $t('admin.backToApp') || 'Back to App' }}
+          ← {{ $t('admin.backToApp') }}
         </router-link>
       </div>
       <div class="header-actions">
-        <span class="welcome-text">{{ $t('admin.welcome') || 'Welcome' }}, {{ user?.firstName || user?.username }}</span>
-        <button @click="handleLogout" class="logout-btn">{{ $t('admin.logout') || 'Logout' }}</button>
+        <span class="welcome-text">{{ $t('admin.welcome') }}, {{ user?.firstName || user?.username }}</span>
+        <button @click="handleLogout" class="logout-btn">{{ $t('admin.logout') }}</button>
       </div>
     </header>
 
@@ -132,7 +132,7 @@
         <div class="section-header">
           <h2>{{ $t('admin.manageUsers') }}</h2>
           <button @click="showAddUserModal = true" class="primary-btn">
-            + {{ $t('admin.addUser') || 'Add User' }}
+            + {{ $t('admin.addUser') }}
           </button>
         </div>
 
@@ -146,7 +146,7 @@
             <p class="stat-number">{{ users.filter(u => u.isActive).length }}</p>
           </div>
           <div class="stat-card">
-            <h3>{{ $t('admin.adminCount') || 'Admins' }}</h3>
+            <h3>{{ $t('admin.adminCount') }}</h3>
             <p class="stat-number">{{ users.filter(u => u.role === 'admin').length }}</p>
           </div>
         </div>
@@ -156,13 +156,13 @@
             <thead>
               <tr>
                 <th>{{ $t('admin.id') }}</th>
-                <th>{{ $t('admin.username') || 'Username' }}</th>
-                <th>{{ $t('admin.email') || 'Email' }}</th>
-                <th>{{ $t('admin.name') || 'Name' }}</th>
-                <th>{{ $t('admin.role') || 'Role' }}</th>
-                <th>{{ $t('admin.status') || 'Status' }}</th>
-                <th>{{ $t('admin.lastLogin') || 'Last Login' }}</th>
-                <th>{{ $t('admin.actions') || 'Actions' }}</th>
+                <th>{{ $t('admin.username') }}</th>
+                <th>{{ $t('admin.email') }}</th>
+                <th>{{ $t('admin.name') }}</th>
+                <th>{{ $t('admin.role') }}</th>
+                <th>{{ $t('admin.status') }}</th>
+                <th>{{ $t('admin.lastLogin') }}</th>
+                <th>{{ $t('admin.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -281,28 +281,28 @@
     <div v-if="showAddUserModal || editingUser" class="modal-overlay" @click="closeUserModal">
       <div class="modal" @click.stop>
         <div class="modal-header">
-          <h3>{{ editingUser ? ($t('admin.editUser') || 'Edit User') : ($t('admin.addUser') || 'Add User') }}</h3>
+          <h3>{{ editingUser ? $t('admin.editUser') : $t('admin.addUser') }}</h3>
           <button @click="closeUserModal" class="close-btn">&times;</button>
         </div>
         
         <form @submit.prevent="saveUser" class="modal-form">
           <div class="form-group">
-            <label>{{ $t('admin.email') || 'Email' }}</label>
+            <label>{{ $t('admin.email') }}</label>
             <input type="email" v-model="userForm.email" required />
           </div>
           
           <div class="form-group">
-            <label>{{ $t('admin.username') || 'Username' }}</label>
+            <label>{{ $t('admin.username') }}</label>
             <input type="text" v-model="userForm.username" required />
           </div>
 
           <div class="form-group">
-            <label>{{ $t('auth.firstName') || 'First Name' }}</label>
+            <label>{{ $t('auth.firstName') }}</label>
             <input type="text" v-model="userForm.firstName" />
           </div>
 
           <div class="form-group">
-            <label>{{ $t('auth.lastName') || 'Last Name' }}</label>
+            <label>{{ $t('auth.lastName') }}</label>
             <input type="text" v-model="userForm.lastName" />
           </div>
           
@@ -312,10 +312,10 @@
           </div>
           
           <div class="form-group">
-            <label>{{ $t('admin.role') || 'Role' }}</label>
+            <label>{{ $t('admin.role') }}</label>
             <select v-model="userForm.role" class="form-select">
               <option value="user">{{ $t('admin.user') }}</option>
-              <option value="admin">{{ $t('admin.panel').split(' ')[0] || 'Admin' }}</option>
+              <option value="admin">{{ $t('admin.adminRole') }}</option>
             </select>
           </div>
           

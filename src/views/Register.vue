@@ -44,41 +44,41 @@
         </div>
 
         <div class="form-group">
-          <label for="username">{{ $t('auth.username') || 'Username' }}</label>
+          <label for="username">{{ $t('auth.username') }}</label>
           <input
             type="text"
             id="username"
             v-model="form.username"
-            :placeholder="$t('auth.usernamePlaceholder') || 'Enter your username'"
+            :placeholder="$t('auth.usernamePlaceholder')"
             required
             :disabled="loading"
           />
         </div>
 
         <div class="form-group">
-          <label for="firstName">{{ $t('auth.firstName') || 'First Name' }}</label>
+          <label for="firstName">{{ $t('auth.firstName') }}</label>
           <input
             type="text"
             id="firstName"
             v-model="form.firstName"
-            :placeholder="$t('auth.firstNamePlaceholder') || 'Enter your first name'"
+            :placeholder="$t('auth.firstNamePlaceholder')"
             :disabled="loading"
           />
         </div>
 
         <div class="form-group">
-          <label for="lastName">{{ $t('auth.lastName') || 'Last Name' }}</label>
+          <label for="lastName">{{ $t('auth.lastName') }}</label>
           <input
             type="text"
             id="lastName"
             v-model="form.lastName"
-            :placeholder="$t('auth.lastNamePlaceholder') || 'Enter your last name'"
+            :placeholder="$t('auth.lastNamePlaceholder')"
             :disabled="loading"
           />
         </div>
 
         <div class="form-group">
-          <label for="language">{{ $t('auth.selectLanguage') || 'Select Language' }}</label>
+          <label for="language">{{ $t('auth.selectLanguage') }}</label>
           <select
             id="language"
             v-model="form.language"
@@ -89,7 +89,7 @@
             <option value="ar">العربية</option>
             <option value="bs">Bosanski</option>
             <option value="hr">Hrvatski</option>
-            <option value="sr">Srpski</option>
+            <option value="sr">Српски</option>
             <option value="es">Español</option>
             <option value="fr">Français</option>
           </select>

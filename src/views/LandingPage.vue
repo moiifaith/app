@@ -13,7 +13,12 @@
             <span class="logo-title">Moii.Faith</span>
           </div>
         </router-link>
-        <div class="nav-links">
+        <button class="hamburger-btn" @click="mobileMenuOpen = !mobileMenuOpen" :class="{ open: mobileMenuOpen }">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="nav-links" :class="{ 'menu-open': mobileMenuOpen }">
           <button @click="toggleTheme" class="theme-toggle-btn" :title="isDark ? $t('zikr.lightMode') : $t('zikr.darkMode')">
             {{ isDark ? '☀️' : '🌙' }}
           </button>
@@ -96,6 +101,16 @@
             <div class="feature-icon">🌍</div>
             <h3>{{ $t('zikr.feature4Title') }}</h3>
             <p>{{ $t('zikr.feature4Description') }}</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🤲</div>
+            <h3>{{ $t('zikr.feature5Title') }}</h3>
+            <p>{{ $t('zikr.feature5Description') }}</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔔</div>
+            <h3>{{ $t('zikr.feature6Title') }}</h3>
+            <p>{{ $t('zikr.feature6Description') }}</p>
           </div>
         </div>
       </div>
@@ -187,6 +202,7 @@ export default {
   },
   data() {
     return {
+      mobileMenuOpen: false,
       currentLanguage: 'en',
       languageOptions: [
         { value: 'en', label: 'English' },
@@ -677,19 +693,62 @@ export default {
   flex-wrap: wrap;
 }
 
+/* Hamburger button - hidden on desktop */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  z-index: 10;
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: white;
+  margin: 5px 0;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-btn.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+  .hamburger-btn {
+    display: block;
+  }
+
   .nav-container {
-    flex-direction: column;
-    gap: 1rem;
+    flex-wrap: wrap;
     padding: 1rem 1rem;
   }
   
   .nav-links {
+    display: none;
     flex-direction: column;
     width: 100%;
     gap: 1rem;
     align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 1rem;
+  }
+
+  .nav-links.menu-open {
+    display: flex;
   }
   
   .language-selector {
