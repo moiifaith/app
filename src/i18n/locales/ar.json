@@ -159,6 +159,8 @@
     "openApp": "افتح التطبيق",
     "lightMode": "الوضع الفاتح",
     "darkMode": "الوضع الداكن",
+    "searchPlaceholder": "ابحث عن الأذكار...",
+    "allCategories": "الكل",
     "saveFailed": "فشل حفظ الذكر المخصص",
     "unknownZikr": "ذكر غير معروف"
   },

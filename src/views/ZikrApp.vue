@@ -106,6 +106,46 @@
             + {{ $t('zikr.addCustomZikr') }}
           </button>
         </div>
+
+        <!-- Search & Filter -->
+        <div class="zikr-search-filter">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input
+              type="text"
+              v-model="searchQuery"
+              :placeholder="$t('zikr.searchPlaceholder')"
+              class="search-input"
+              @input="currentPage = 1"
+            />
+            <button v-if="searchQuery" @click="searchQuery = ''; currentPage = 1" class="search-clear">&times;</button>
+          </div>
+          <div class="category-filter">
+            <button
+              @click="selectedCategory = ''; currentPage = 1"
+              class="category-btn"
+              :class="{ active: selectedCategory === '' }"
+            >
+              {{ $t('zikr.allCategories') }}
+            </button>
+            <button
+              v-for="(cat, key) in zikrCategories"
+              :key="key"
+              @click="selectedCategory = key; currentPage = 1"
+              class="category-btn"
+              :class="{ active: selectedCategory === key }"
+            >
+              {{ cat[currentLanguage] || cat.en }}
+            </button>
+          </div>
+          <div class="filter-info">
+            <span>{{ filteredZikrs.length }} {{ $t('zikr.zikrs') }}</span>
+          </div>
+        </div>
+
         <div class="zikr-grid">
           <div 
             v-for="zikr in paginatedZikrs" 
@@ -269,7 +309,7 @@
 </template>
 
 <script>
-import { zikrData } from '../data/zikrs'
+import { zikrData, zikrCategories } from '../data/zikrs'
 import { zikrDescriptions } from '../data/zikrDescriptions'
 import { useAuth } from '@/composables/useAuth'
 import { useModal } from '@/composables/useModal'
@@ -325,13 +365,30 @@ export default {
     }
   },
   computed: {
+    filteredZikrs() {
+      let result = this.zikrs
+      if (this.selectedCategory) {
+        result = result.filter(z => z.category === this.selectedCategory)
+      }
+      if (this.searchQuery.trim()) {
+        const q = this.searchQuery.trim().toLowerCase()
+        result = result.filter(z => {
+          const desc = this.getZikrDescription(z.identifier) || ''
+          return z.arabic.includes(q) ||
+            z.latin.toLowerCase().includes(q) ||
+            z.identifier.toLowerCase().includes(q) ||
+            desc.toLowerCase().includes(q)
+        })
+      }
+      return result
+    },
     totalPages() {
-      return Math.ceil(this.zikrs.length / this.itemsPerPage)
+      return Math.ceil(this.filteredZikrs.length / this.itemsPerPage)
     },
     paginatedZikrs() {
       const start = (this.currentPage - 1) * this.itemsPerPage
       const end = start + this.itemsPerPage
-      return this.zikrs.slice(start, end)
+      return this.filteredZikrs.slice(start, end)
     },
     visiblePages() {
       const pages = []
@@ -367,9 +424,13 @@ export default {
       todayCompletedCount: 0,
       todayTotalCount: 0,
       descriptions: {},
+      // Search & Filter
+      searchQuery: '',
+      selectedCategory: '',
+      zikrCategories: zikrCategories,
       // Pagination
       currentPage: 1,
-      itemsPerPage: 6,
+      itemsPerPage: 12,
       // Custom Zikr
       showCustomZikrModal: false,
       savingCustomZikr: false,
@@ -410,64 +471,41 @@ export default {
     },
 
     async loadZikrs() {
+      // Always use local zikrData as the base (200 entries)
+      this.zikrs = zikrData.map(zikr => ({
+        ...zikr,
+        currentReps: zikr.defaultRepetitions
+      }))
+
+      // Try to fetch custom user zikrs from API and merge them in
       try {
         const response = await fetch('/api/zikrs')
         const data = await response.json()
-        if (data.success) {
-          // Initialize zikrs with current repetitions
-          this.zikrs = data.data.map(zikr => ({
-            ...zikr,
-            currentReps: zikr.defaultRepetitions
-          }))
-          
-          // Load saved repetitions preferences
-          const savedReps = JSON.parse(localStorage.getItem('zikrRepetitions') || '{}')
-          this.zikrs.forEach(zikr => {
-            if (savedReps[zikr.id]) {
-              zikr.currentReps = savedReps[zikr.id]
-            }
-          })
-          
-          // Update today's stats after loading zikrs
-          this.updateTodayStats()
-        } else {
-          console.error('Failed to load zikrs:', data.message)
-          // Fallback to local data
-          this.zikrs = zikrData.map(zikr => ({
-            ...zikr,
-            currentReps: zikr.defaultRepetitions
-          }))
-          
-          // Load saved repetitions preferences
-          const savedReps = JSON.parse(localStorage.getItem('zikrRepetitions') || '{}')
-          this.zikrs.forEach(zikr => {
-            if (savedReps[zikr.id]) {
-              zikr.currentReps = savedReps[zikr.id]
-            }
-          })
-          
-          // Update today's stats after loading fallback data
-          this.updateTodayStats()
+        if (data.success && data.data) {
+          const customZikrs = data.data.filter(z => z.isCustom)
+          if (customZikrs.length > 0) {
+            const existingIds = new Set(this.zikrs.map(z => z.id))
+            customZikrs.forEach(z => {
+              if (!existingIds.has(z.id)) {
+                this.zikrs.push({ ...z, currentReps: z.defaultRepetitions })
+              }
+            })
+          }
         }
       } catch (error) {
-        console.error('Error loading zikrs:', error)
-        // Fallback to local data
-        this.zikrs = zikrData.map(zikr => ({
-          ...zikr,
-          currentReps: zikr.defaultRepetitions
-        }))
-        
-        // Load saved repetitions preferences
-        const savedReps = JSON.parse(localStorage.getItem('zikrRepetitions') || '{}')
-        this.zikrs.forEach(zikr => {
-          if (savedReps[zikr.id]) {
-            zikr.currentReps = savedReps[zikr.id]
-          }
-        })
-        
-        // Update today's stats after loading fallback data
-        this.updateTodayStats()
+        console.log('API unavailable, using local data')
       }
+
+      // Load saved repetitions preferences
+      const savedReps = JSON.parse(localStorage.getItem('zikrRepetitions') || '{}')
+      this.zikrs.forEach(zikr => {
+        if (savedReps[zikr.id]) {
+          zikr.currentReps = savedReps[zikr.id]
+        }
+      })
+
+      // Update today's stats after loading zikrs
+      this.updateTodayStats()
     },
     
     updateTodayStats() {
@@ -826,6 +864,102 @@ export default {
 .zikr-list h2 {
   margin-bottom: 25px;
   color: var(--text-primary);
+}
+
+/* Search & Filter */
+.zikr-search-filter {
+  margin-bottom: 20px;
+}
+
+.search-box {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary, #888);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 40px 12px 42px;
+  border: 2px solid var(--border-color, #e0e0e0);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #16a34a;
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary, #888);
+}
+
+.search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--text-secondary, #888);
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.search-clear:hover {
+  color: var(--text-primary);
+}
+
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.category-btn {
+  padding: 6px 14px;
+  border: 1.5px solid var(--border-color, #e0e0e0);
+  border-radius: 20px;
+  background: var(--bg-card);
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.category-btn:hover {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+.category-btn.active {
+  background: #16a34a;
+  color: white;
+  border-color: #16a34a;
+}
+
+.filter-info {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #888);
 }
 
 .zikr-grid {

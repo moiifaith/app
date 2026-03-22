@@ -162,7 +162,9 @@
     "lightMode": "Light Mode",
     "darkMode": "Dark Mode",
     "saveFailed": "Failed to save custom zikr",
-    "unknownZikr": "Unknown Zikr"
+    "unknownZikr": "Unknown Zikr",
+    "searchPlaceholder": "Search zikrs...",
+    "allCategories": "All"
   },
   "admin": {
     "loginTitle": "Admin Login",

@@ -159,6 +159,8 @@
     "openApp": "Ouvrir l'App",
     "lightMode": "Mode Clair",
     "darkMode": "Mode Sombre",
+    "searchPlaceholder": "Rechercher des azkar...",
+    "allCategories": "Tous",
     "saveFailed": "Échec de l'enregistrement du zikr personnalisé",
     "unknownZikr": "Zikr Inconnu"
   },

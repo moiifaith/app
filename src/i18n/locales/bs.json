@@ -161,6 +161,8 @@
     "openApp": "Otvori Aplikaciju",
     "lightMode": "Svijetli način",
     "darkMode": "Tamni način",
+    "searchPlaceholder": "Pretraži zikrove...",
+    "allCategories": "Sve",
     "saveFailed": "Spremanje prilagođenog zikra nije uspjelo",
     "unknownZikr": "Nepoznati zikr"
   },
