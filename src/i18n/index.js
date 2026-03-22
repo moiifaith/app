@@ -12,17 +12,24 @@ import sr from './locales/sr.json'
 
 const localMessages = { en, ar, es, fr, bs, hr, sr }
 
-// Safe merge: overlay API translations on top of local base
-// but NEVER let flat API values overwrite nested locale objects
-function safeMerge(localBase, apiTranslations) {
+// Bump this when locale files change to invalidate stale browser caches
+const TRANSLATION_CACHE_VERSION = '2026-03-22'
+
+// Deep merge: overlay API translations on top of local base
+// Local keys missing from API are always preserved (handles stale KV data)
+function deepMerge(localBase, apiTranslations) {
   const merged = { ...localBase }
   if (apiTranslations && typeof apiTranslations === 'object') {
     for (const [key, value] of Object.entries(apiTranslations)) {
-      if (typeof merged[key] === 'object' && merged[key] !== null && typeof value !== 'object') {
-        // Never overwrite a nested object (admin, zikr, auth, etc.) with a flat string
+      if (typeof merged[key] === 'object' && merged[key] !== null && typeof value === 'object' && value !== null) {
+        // Both are objects: recursively merge so local-only keys survive
+        merged[key] = deepMerge(merged[key], value)
+      } else if (typeof merged[key] === 'object' && merged[key] !== null && typeof value !== 'object') {
+        // Never overwrite a nested object with a flat string
         continue
+      } else {
+        merged[key] = value
       }
-      merged[key] = value
     }
   }
   return merged
@@ -160,11 +167,22 @@ const i18n = createI18n({
 
 // Load initial translations
 async function initializeTranslations() {
+  // Invalidate stale caches when code ships with updated locale files
+  const { value: cachedCacheVersion } = await Preferences.get({ key: 'translation_cache_version' })
+  if (cachedCacheVersion !== TRANSLATION_CACHE_VERSION) {
+    const supportedLocales = ['en', 'ar', 'es', 'fr', 'bs', 'hr', 'sr']
+    for (const loc of supportedLocales) {
+      await Preferences.remove({ key: `translations_${loc}` })
+      await Preferences.remove({ key: `translation_version_${loc}` })
+    }
+    await Preferences.set({ key: 'translation_cache_version', value: TRANSLATION_CACHE_VERSION })
+  }
+
   const defaultLocale = await getDefaultLocale()
   const translations = await loadTranslations(defaultLocale)
-  // Safe merge: API translations can add keys but never overwrite nested objects
+  // Deep merge: API translations overlay local, but local-only keys are preserved
   const localBase = localMessages[defaultLocale] || localMessages.en || {}
-  const merged = safeMerge(localBase, translations)
+  const merged = deepMerge(localBase, translations)
   i18n.global.setLocaleMessage(defaultLocale, merged)
   i18n.global.locale.value = defaultLocale
 }
@@ -179,7 +197,7 @@ export async function setLanguage(locale) {
   // Load translations and safe merge with local messages
   const translations = await loadTranslations(locale)
   const localBase = localMessages[locale] || localMessages.en || {}
-  const merged = safeMerge(localBase, translations)
+  const merged = deepMerge(localBase, translations)
   i18n.global.setLocaleMessage(locale, merged)
   
   i18n.global.locale.value = locale
