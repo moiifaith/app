@@ -63,13 +63,13 @@
                   class="btn btn-primary"
                   :class="{ 'btn-danger': confirmType === 'danger' }"
                 >
-                  {{ confirmText || $t('common.confirm') || 'Confirm' }}
+                  {{ confirmText || $t('common.confirm') }}
                 </button>
                 <button 
                   @click="handleCancel"
                   class="btn btn-secondary"
                 >
-                  {{ cancelText || $t('common.cancel') || 'Cancel' }}
+                  {{ cancelText || $t('common.cancel') }}
                 </button>
               </div>
               <div v-else-if="type === 'alert'" class="alert-buttons">
@@ -77,7 +77,7 @@
                   @click="close"
                   class="btn btn-primary"
                 >
-                  {{ okText || $t('common.ok') || 'OK' }}
+                  {{ okText || $t('common.ok') }}
                 </button>
               </div>
             </slot>

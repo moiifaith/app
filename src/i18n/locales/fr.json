@@ -254,5 +254,10 @@
     "groupDescriptions": "Descriptions des Zikrs",
     "newPasswordHint": "Nouveau mot de passe (laisser vide pour conserver)",
     "id": "ID"
+  },
+  "common": {
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "ok": "OK"
   }
 }

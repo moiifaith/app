@@ -202,9 +202,9 @@ export default {
         this.$t('zikr.confirmReset'),
         { 
           type: 'warning', 
-          title: this.$t('zikr.reset') || 'Reset Counter',
-          confirmText: this.$t('zikr.reset') || 'Reset',
-          cancelText: this.$t('zikr.cancel') || 'Cancel'
+          title: this.$t('zikr.reset'),
+          confirmText: this.$t('zikr.reset'),
+          cancelText: this.$t('zikr.cancel')
         }
       )
       

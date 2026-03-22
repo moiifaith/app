@@ -254,5 +254,10 @@
     "groupDescriptions": "Descripciones de Zikrs",
     "newPasswordHint": "Nueva contraseña (dejar vacío para mantener)",
     "id": "ID"
+  },
+  "common": {
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "ok": "Aceptar"
   }
 }

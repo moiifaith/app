@@ -1,5 +1,5 @@
 {
-  "welcome": "مرحباً بكم في عداد الأذكار",
+  "welcome": "مرحباً بكم في Moii.Faith",
   "homeDescription": "تطبيق حديث مع Vue.js ودعم متعدد اللغات وإمكانيات الهاتف المحمول.",
   "feature1Title": "إطار عمل حديث",
   "feature1Description": "مبني على Vue 3، أحدث وأقوى إصدار من إطار عمل Vue.js.",
@@ -254,5 +254,10 @@
     "groupDescriptions": "أوصاف الأذكار",
     "newPasswordHint": "كلمة مرور جديدة (اتركها فارغة للإبقاء)",
     "id": "ID"
+  },
+  "common": {
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "ok": "حسناً"
   }
 }

@@ -256,5 +256,10 @@
     "groupDescriptions": "Opisi Zikrova",
     "newPasswordHint": "Nova lozinka (ostavite prazno za zadržavanje)",
     "id": "ID"
+  },
+  "common": {
+    "confirm": "Potvrdi",
+    "cancel": "Otkaži",
+    "ok": "U redu"
   }
 }

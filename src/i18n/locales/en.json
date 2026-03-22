@@ -256,5 +256,10 @@
     "groupDescriptions": "Zikr Descriptions",
     "newPasswordHint": "New Password (leave empty to keep)",
     "id": "ID"
+  },
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "ok": "OK"
   }
 }

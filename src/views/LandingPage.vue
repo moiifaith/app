@@ -760,7 +760,7 @@ export default {
   .hero {
     flex-direction: column;
     text-align: center;
-    padding: 40px 20px;
+    padding: 100px 20px 40px;
   }
 
   .hero-image {

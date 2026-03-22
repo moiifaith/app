@@ -12,6 +12,22 @@ import sr from './locales/sr.json'
 
 const localMessages = { en, ar, es, fr, bs, hr, sr }
 
+// Safe merge: overlay API translations on top of local base
+// but NEVER let flat API values overwrite nested locale objects
+function safeMerge(localBase, apiTranslations) {
+  const merged = { ...localBase }
+  if (apiTranslations && typeof apiTranslations === 'object') {
+    for (const [key, value] of Object.entries(apiTranslations)) {
+      if (typeof merged[key] === 'object' && merged[key] !== null && typeof value !== 'object') {
+        // Never overwrite a nested object (admin, zikr, auth, etc.) with a flat string
+        continue
+      }
+      merged[key] = value
+    }
+  }
+  return merged
+}
+
 // Get the browser language or fallback to 'en'
 async function getDefaultLocale() {
   // Try to get saved language from Capacitor Preferences
@@ -146,9 +162,9 @@ const i18n = createI18n({
 async function initializeTranslations() {
   const defaultLocale = await getDefaultLocale()
   const translations = await loadTranslations(defaultLocale)
-  // Merge API translations with local messages to preserve all keys
+  // Safe merge: API translations can add keys but never overwrite nested objects
   const localBase = localMessages[defaultLocale] || localMessages.en || {}
-  const merged = { ...localBase, ...translations }
+  const merged = safeMerge(localBase, translations)
   i18n.global.setLocaleMessage(defaultLocale, merged)
   i18n.global.locale.value = defaultLocale
 }
@@ -160,10 +176,10 @@ export default i18n
 
 // Export function to change language
 export async function setLanguage(locale) {
-  // Load translations and merge with local messages
+  // Load translations and safe merge with local messages
   const translations = await loadTranslations(locale)
   const localBase = localMessages[locale] || localMessages.en || {}
-  const merged = { ...localBase, ...translations }
+  const merged = safeMerge(localBase, translations)
   i18n.global.setLocaleMessage(locale, merged)
   
   i18n.global.locale.value = locale
