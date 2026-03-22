@@ -82,7 +82,7 @@
     "networkError": "Greška mreže. Molimo pokušajte ponovo."
   },
   "zikr": {
-    "appName": "Brojač Zikra",
+    "appName": "Moii.Faith",
     "appDescription": "Vaš digitalni pratilac za islamsko spominjanje i duhovnu praksu",
     "startZikr": "Započnite Vaše Putovanje Zikra",
     "featuresTitle": "Mogućnosti",
@@ -238,6 +238,9 @@
     "userSaveFailed": "Spremanje korisnika nije uspjelo.",
     "userDeletedMsg": "Korisnik uspješno obrisan!",
     "userActionMsg": "Korisnik uspješno {action}!",
+    "cannotBlockSelf": "Ne možete blokirati vlastiti račun.",
+    "cannotDeleteSelf": "Ne možete obrisati vlastiti račun.",
+    "cannotDeleteOnlyAdmin": "Ne možete obrisati jedini administratorski račun.",
     "translationSaveFailed": "Spremanje prijevoda nije uspjelo. Molimo pokušajte ponovo.",
     "zikrSaveFailed": "Spremanje zikra nije uspjelo. Molimo pokušajte ponovo.",
     "zikrDeleteFailed": "Brisanje zikra nije uspjelo. Molimo pokušajte ponovo.",

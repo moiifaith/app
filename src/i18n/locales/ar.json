@@ -82,7 +82,7 @@
     "networkError": "خطأ في الشبكة. يرجى المحاولة مرة أخرى."
   },
   "zikr": {
-    "appName": "عداد الأذكار",
+    "appName": "Moii.Faith",
     "appDescription": "رفيقك الرقمي للذكر الإسلامي والممارسة الروحية",
     "startZikr": "ابدأ رحلة الذكر",
     "featuresTitle": "المميزات",
@@ -238,6 +238,9 @@
     "userSaveFailed": "فشل حفظ المستخدم.",
     "userDeletedMsg": "تم حذف المستخدم بنجاح!",
     "userActionMsg": "تم {action} المستخدم بنجاح!",
+    "cannotBlockSelf": "لا يمكنك حظر حسابك الخاص.",
+    "cannotDeleteSelf": "لا يمكنك حذف حسابك الخاص.",
+    "cannotDeleteOnlyAdmin": "لا يمكن حذف حساب المسؤول الوحيد.",
     "translationSaveFailed": "فشل حفظ الترجمات. يرجى المحاولة مرة أخرى.",
     "zikrSaveFailed": "فشل حفظ الذكر. يرجى المحاولة مرة أخرى.",
     "zikrDeleteFailed": "فشل حذف الذكر. يرجى المحاولة مرة أخرى.",

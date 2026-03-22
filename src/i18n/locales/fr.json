@@ -82,7 +82,7 @@
     "networkError": "Erreur réseau. Veuillez réessayer."
   },
   "zikr": {
-    "appName": "Compteur de Zikr",
+    "appName": "Moii.Faith",
     "appDescription": "Votre compagnon numerique pour le rappel islamique et la pratique spirituelle",
     "startZikr": "Commencez Votre Voyage de Zikr",
     "featuresTitle": "Fonctionnalites",
@@ -238,6 +238,9 @@
     "userSaveFailed": "Échec de l'enregistrement de l'utilisateur.",
     "userDeletedMsg": "Utilisateur supprimé avec succès !",
     "userActionMsg": "Utilisateur {action} avec succès !",
+    "cannotBlockSelf": "Vous ne pouvez pas bloquer votre propre compte.",
+    "cannotDeleteSelf": "Vous ne pouvez pas supprimer votre propre compte.",
+    "cannotDeleteOnlyAdmin": "Impossible de supprimer le seul compte administrateur.",
     "translationSaveFailed": "Échec de l'enregistrement des traductions. Veuillez réessayer.",
     "zikrSaveFailed": "Échec de l'enregistrement du zikr. Veuillez réessayer.",
     "zikrDeleteFailed": "Échec de la suppression du zikr. Veuillez réessayer.",

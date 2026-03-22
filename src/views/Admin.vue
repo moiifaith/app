@@ -182,10 +182,21 @@
                 <td>{{ u.lastLogin ? formatDate(u.lastLogin) : $t('admin.never') }}</td>
                 <td class="user-actions">
                   <button @click="editUser(u)" class="edit-btn">{{ $t('admin.edit') }}</button>
-                  <button @click="toggleUserBlock(u)" class="block-btn" :class="{ unblock: !u.isActive }">
+                  <button 
+                    @click="toggleUserBlock(u)" 
+                    class="block-btn" 
+                    :class="{ unblock: !u.isActive }"
+                    :disabled="u.id === user?.id"
+                  >
                     {{ u.isActive ? $t('admin.block') : $t('admin.unblock') }}
                   </button>
-                  <button @click="deleteUser(u.id)" class="delete-btn">{{ $t('admin.delete') }}</button>
+                  <button 
+                    @click="deleteUser(u.id)" 
+                    class="delete-btn"
+                    :disabled="u.id === user?.id"
+                  >
+                    {{ $t('admin.delete') }}
+                  </button>
                 </td>
               </tr>
               <tr v-if="users.length === 0">
@@ -712,6 +723,10 @@ export default {
     },
 
     async toggleUserBlock(u) {
+      if (u.id === this.user?.id) {
+        await this.showAlert(this.$t('admin.cannotBlockSelf'), { type: 'warning', title: this.$t('admin.error') })
+        return
+      }
       const action = u.isActive ? this.$t('admin.block').toLowerCase() : this.$t('admin.unblock').toLowerCase()
       const confirmed = await this.showConfirm(
         this.$t('admin.confirmBlockMsg', { action, user: u.username }),
@@ -736,6 +751,16 @@ export default {
     },
 
     async deleteUser(id) {
+      if (id === this.user?.id) {
+        await this.showAlert(this.$t('admin.cannotDeleteSelf'), { type: 'warning', title: this.$t('admin.error') })
+        return
+      }
+      const adminCount = this.users.filter(u => u.role === 'admin').length
+      const targetUser = this.users.find(u => u.id === id)
+      if (targetUser?.role === 'admin' && adminCount <= 1) {
+        await this.showAlert(this.$t('admin.cannotDeleteOnlyAdmin'), { type: 'warning', title: this.$t('admin.error') })
+        return
+      }
       const confirmed = await this.showConfirm(
         this.$t('admin.confirmDeleteUserMsg'),
         { type: 'danger', title: this.$t('admin.confirmDelete'), confirmText: this.$t('admin.delete'), cancelText: this.$t('admin.cancel') }
@@ -1029,11 +1054,12 @@ export default {
 }
 
 .edit-btn, .delete-btn {
-  padding: 8px 16px;
+  padding: 6px 14px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
+  font-size: 0.85rem;
   transition: all 0.3s ease;
 }
 
@@ -1161,6 +1187,7 @@ export default {
   padding: 25px;
   border-radius: 15px;
   box-shadow: 0 2px 10px var(--shadow);
+  overflow-x: auto;
 }
 
 .users-table h3 {
@@ -1171,19 +1198,28 @@ export default {
 .users-table table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 700px;
 }
 
 .users-table th,
 .users-table td {
-  padding: 12px;
+  padding: 12px 10px;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .users-table th {
   background: var(--bg-secondary);
   font-weight: 600;
   color: var(--text-primary);
+  position: sticky;
+  top: 0;
+}
+
+.users-table tbody tr:hover {
+  background: var(--bg-secondary);
 }
 
 /* Analytics Section */
@@ -1404,9 +1440,9 @@ export default {
 }
 
 .block-btn {
-  padding: 6px 12px;
+  padding: 6px 14px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   font-size: 0.85rem;
@@ -1419,8 +1455,14 @@ export default {
   background: #28a745;
 }
 
-.block-btn:hover {
+.block-btn:hover:not(:disabled) {
   opacity: 0.85;
+}
+
+.block-btn:disabled,
+.delete-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .form-select {

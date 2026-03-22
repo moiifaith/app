@@ -10,7 +10,7 @@
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
             </div>
-            <span class="logo-title">MoiiFaith</span>
+            <span class="logo-title">Moii.Faith</span>
           </div>
         </router-link>
         <div class="nav-links">
@@ -310,27 +310,23 @@ export default {
   white-space: nowrap;
   background: rgba(255, 255, 255, 0.9);
   color: #16a34a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .nav-link:hover {
   background: white;
   color: #15803d;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .app-link {
   background: #16a34a !important;
   color: white !important;
   border-color: transparent !important;
-  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
 }
 
 .app-link:hover {
-  background: linear-gradient(135deg, #15803d 0%, #166534 100%) !important;
+  background: #15803d !important;
   color: white !important;
-  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
 }
 
 .container {
@@ -488,7 +484,6 @@ export default {
 
 .cta-button.primary {
   background: #16a34a;
-  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
   border-color: transparent;
 }
 
@@ -501,7 +496,6 @@ export default {
 .cta-button.secondary:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
 }
 
 .cta-button:hover {
@@ -509,7 +503,7 @@ export default {
 }
 
 .cta-button.primary:hover {
-  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+  background: #15803d;
 }
 
 /* Features Section */

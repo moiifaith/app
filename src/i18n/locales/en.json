@@ -82,7 +82,7 @@
     "networkError": "Network error. Please try again."
   },
   "zikr": {
-    "appName": "Zikr Counter",
+    "appName": "Moii.Faith",
     "appDescription": "Your digital companion for Islamic remembrance and spiritual practice",
     "startZikr": "Start Your Zikr Journey",
     "featuresTitle": "Features",
@@ -238,6 +238,9 @@
     "userSaveFailed": "Failed to save user.",
     "userDeletedMsg": "User deleted successfully!",
     "userActionMsg": "User {action} successfully!",
+    "cannotBlockSelf": "You cannot block your own account.",
+    "cannotDeleteSelf": "You cannot delete your own account.",
+    "cannotDeleteOnlyAdmin": "Cannot delete the only admin account.",
     "translationSaveFailed": "Failed to save translations. Please try again.",
     "zikrSaveFailed": "Failed to save zikr. Please try again.",
     "zikrDeleteFailed": "Failed to delete zikr. Please try again.",

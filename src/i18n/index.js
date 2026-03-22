@@ -146,7 +146,10 @@ const i18n = createI18n({
 async function initializeTranslations() {
   const defaultLocale = await getDefaultLocale()
   const translations = await loadTranslations(defaultLocale)
-  i18n.global.setLocaleMessage(defaultLocale, translations)
+  // Merge API translations with local messages to preserve all keys
+  const localBase = localMessages[defaultLocale] || localMessages.en || {}
+  const merged = { ...localBase, ...translations }
+  i18n.global.setLocaleMessage(defaultLocale, merged)
   i18n.global.locale.value = defaultLocale
 }
 
@@ -157,11 +160,11 @@ export default i18n
 
 // Export function to change language
 export async function setLanguage(locale) {
-  // Load translations for the new locale if not already loaded
-  if (!i18n.global.availableLocales.includes(locale)) {
-    const translations = await loadTranslations(locale)
-    i18n.global.setLocaleMessage(locale, translations)
-  }
+  // Load translations and merge with local messages
+  const translations = await loadTranslations(locale)
+  const localBase = localMessages[locale] || localMessages.en || {}
+  const merged = { ...localBase, ...translations }
+  i18n.global.setLocaleMessage(locale, merged)
   
   i18n.global.locale.value = locale
   await Preferences.set({ key: 'language', value: locale })

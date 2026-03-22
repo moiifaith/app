@@ -12,7 +12,13 @@
         </div>
       </router-link>
       
-      <div class="header-actions">
+      <button class="hamburger-btn" @click="mobileMenuOpen = !mobileMenuOpen" :class="{ open: mobileMenuOpen }">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="header-actions" :class="{ 'menu-open': mobileMenuOpen }">
         <button @click="toggleTheme" class="theme-toggle-btn" :title="isDark ? $t('zikr.lightMode') : $t('zikr.darkMode')">
           {{ isDark ? '☀️' : '🌙' }}
         </button>
@@ -346,6 +352,7 @@ export default {
   },
   data() {
     return {
+      mobileMenuOpen: false,
       currentLanguage: 'en',
       languageOptions: [
         { value: 'en', label: 'English' },
@@ -1193,10 +1200,75 @@ export default {
   font-size: 0.9rem;
 }
 
+/* Hamburger button - hidden on desktop */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  z-index: 10;
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: white;
+  margin: 5px 0;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-btn.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
 @media (max-width: 768px) {
+  .hamburger-btn {
+    display: block;
+  }
+
   .app-header {
+    flex-wrap: wrap;
+    gap: 0;
+    position: relative;
+  }
+
+  .header-actions {
+    display: none;
     flex-direction: column;
-    gap: 15px;
+    width: 100%;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 15px;
+  }
+
+  .header-actions.menu-open {
+    display: flex;
+  }
+
+  .header-actions .admin-btn,
+  .header-actions .history-btn,
+  .header-actions .logout-btn,
+  .header-actions .login-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 10px 16px;
+  }
+
+  .header-actions .language-selector {
+    width: 100%;
   }
 
   .zikr-grid {
