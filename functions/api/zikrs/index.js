@@ -40,78 +40,29 @@ export async function onRequestGet(context) {
     }
     
     // Fallback to default zikrs if database is empty or fails
+    // Client-side zikrs.js has the full 200 entries; this is a minimal server fallback
     if (zikrs.length === 0) {
       zikrs = [
-        {
-          id: 1,
-          arabic: 'سُبْحَانَ اللهِ',
-          latin: 'Subhan Allah',
-          identifier: 'subhan_allah',
-          defaultRepetitions: 33
-        },
-        {
-          id: 2,
-          arabic: 'الْحَمْدُ لِلّهِ',
-          latin: 'Alhamdulillah',
-          identifier: 'alhamdulillah',
-          defaultRepetitions: 33
-        },
-        {
-          id: 3,
-          arabic: 'اللّهُ أَكْبَرُ',
-          latin: 'Allahu Akbar',
-          identifier: 'allahu_akbar',
-          defaultRepetitions: 34
-        },
-        {
-          id: 4,
-          arabic: 'لَا إِلَهَ إِلَّا اللّهُ',
-          latin: 'La ilaha illa Allah',
-          identifier: 'la_ilaha_illa_allah',
-          defaultRepetitions: 100
-        },
-        {
-          id: 5,
-          arabic: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ',
-          latin: 'Allahumma salli ala Muhammad',
-          identifier: 'salawat',
-          defaultRepetitions: 10
-        },
-        {
-          id: 6,
-          arabic: 'أَسْتَغْفِرُ اللّهَ',
-          latin: 'Astaghfirullah',
-          identifier: 'astaghfirullah',
-          defaultRepetitions: 70
-        },
-        {
-          id: 7,
-          arabic: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّهِ',
-          latin: 'La hawla wa la quwwata illa billah',
-          identifier: 'la_hawla',
-          defaultRepetitions: 10
-        },
-        {
-          id: 8,
-          arabic: 'بِسْمِ اللّهِ',
-          latin: 'Bismillah',
-          identifier: 'bismillah',
-          defaultRepetitions: 21
-        },
-        {
-          id: 9,
-          arabic: 'رَبِّ اغْفِرْ لِي',
-          latin: 'Rabbi ghfir li',
-          identifier: 'rabbi_ghfir_li',
-          defaultRepetitions: 25
-        },
-        {
-          id: 10,
-          arabic: 'سُبْحَانَ اللهِ وَبِحَمْدِهِ',
-          latin: 'Subhan Allahi wa bihamdihi',
-          identifier: 'subhan_allah_wa_bihamdihi',
-          defaultRepetitions: 100
-        }
+        { id: 1, arabic: 'سُبْحَانَ اللهِ', latin: 'Subhan Allah', identifier: 'subhan_allah', defaultRepetitions: 33 },
+        { id: 2, arabic: 'الْحَمْدُ لِلّهِ', latin: 'Alhamdulillah', identifier: 'alhamdulillah', defaultRepetitions: 33 },
+        { id: 3, arabic: 'اللّهُ أَكْبَرُ', latin: 'Allahu Akbar', identifier: 'allahu_akbar', defaultRepetitions: 34 },
+        { id: 4, arabic: 'لَا إِلَهَ إِلَّا اللّهُ', latin: 'La ilaha illa Allah', identifier: 'la_ilaha_illa_allah', defaultRepetitions: 100 },
+        { id: 5, arabic: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ', latin: 'Allahumma salli ala Muhammad', identifier: 'salawat', defaultRepetitions: 10 },
+        { id: 6, arabic: 'أَسْتَغْفِرُ اللّهَ', latin: 'Astaghfirullah', identifier: 'astaghfirullah', defaultRepetitions: 70 },
+        { id: 7, arabic: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّهِ', latin: 'La hawla wa la quwwata illa billah', identifier: 'la_hawla', defaultRepetitions: 10 },
+        { id: 8, arabic: 'بِسْمِ اللّهِ', latin: 'Bismillah', identifier: 'bismillah', defaultRepetitions: 21 },
+        { id: 9, arabic: 'رَبِّ اغْفِرْ لِي', latin: 'Rabbi ghfir li', identifier: 'rabbi_ghfir_li', defaultRepetitions: 25 },
+        { id: 10, arabic: 'سُبْحَانَ اللهِ وَبِحَمْدِهِ', latin: 'Subhan Allahi wa bihamdihi', identifier: 'subhan_allah_wa_bihamdihi', defaultRepetitions: 100 },
+        { id: 11, arabic: 'سُبْحَانَ اللهِ الْعَظِيمِ', latin: 'Subhan Allahil Azim', identifier: 'subhan_allah_al_azim', defaultRepetitions: 100 },
+        { id: 12, arabic: 'سُبْحَانَ اللهِ وَبِحَمْدِهِ سُبْحَانَ اللهِ الْعَظِيمِ', latin: 'Subhan Allahi wa bihamdihi Subhan Allahil Azim', identifier: 'subhan_allah_combined', defaultRepetitions: 100 },
+        { id: 13, arabic: 'سُبُّوحٌ قُدُّوسٌ رَبُّ الْمَلَائِكَةِ وَالرُّوحِ', latin: 'Subbuhun Quddusun Rabbul Malaikati war-Ruh', identifier: 'subbuhun_quddusun', defaultRepetitions: 10 },
+        { id: 14, arabic: 'حَسْبِيَ اللّهُ لَا إِلَهَ إِلَّا هُوَ', latin: 'Hasbiyallahu la ilaha illa Huwa', identifier: 'hasbiyallah', defaultRepetitions: 7 },
+        { id: 15, arabic: 'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ', latin: 'Ya Hayyu Ya Qayyumu birahmatika astagheeth', identifier: 'ya_hayyu_ya_qayyum', defaultRepetitions: 3 },
+        { id: 16, arabic: 'لَا إِلَهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ', latin: 'La ilaha illa Anta Subhanaka inni kuntu minaz-zalimin', identifier: 'dua_yunus', defaultRepetitions: 7 },
+        { id: 17, arabic: 'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ', latin: 'Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan wa qina adhaban-nar', identifier: 'rabbana_atina', defaultRepetitions: 7 },
+        { id: 18, arabic: 'رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا', latin: 'Rabbana la tuzigh qulubana bada idh hadaytana', identifier: 'rabbana_la_tuzigh', defaultRepetitions: 3 },
+        { id: 19, arabic: 'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ', latin: 'Allahumma inni audhu bika minal-hammi wal-hazan', identifier: 'audhu_min_alhamm', defaultRepetitions: 3 },
+        { id: 20, arabic: 'رَبِّ زِدْنِي عِلْمًا', latin: 'Rabbi zidni ilma', identifier: 'rabbi_zidni_ilma', defaultRepetitions: 7 },
       ];
     }
     return new Response(JSON.stringify({
