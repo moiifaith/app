@@ -74,7 +74,12 @@
     "username": "اسم المستخدم",
     "usernamePlaceholder": "أدخل اسم المستخدم",
     "firstNamePlaceholder": "أدخل اسمك الأول",
-    "lastNamePlaceholder": "أدخل اسم عائلتك"
+    "lastNamePlaceholder": "أدخل اسم عائلتك",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين",
+    "passwordTooShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+    "loginFailed": "فشل تسجيل الدخول",
+    "registrationFailed": "فشل التسجيل",
+    "networkError": "خطأ في الشبكة. يرجى المحاولة مرة أخرى."
   },
   "zikr": {
     "appName": "عداد الأذكار",
@@ -149,7 +154,11 @@
     "exitConfirm": "تأكيد الخروج",
     "confirmLogout": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
     "confirmLogoutTitle": "تأكيد تسجيل الخروج",
-    "openApp": "افتح التطبيق"
+    "openApp": "افتح التطبيق",
+    "lightMode": "الوضع الفاتح",
+    "darkMode": "الوضع الداكن",
+    "saveFailed": "فشل حفظ الذكر المخصص",
+    "unknownZikr": "ذكر غير معروف"
   },
   "admin": {
     "loginTitle": "تسجيل دخول المشرف",
@@ -220,6 +229,24 @@
     "unblock": "إلغاء الحظر",
     "noUsersFound": "لم يتم العثور على مستخدمين",
     "user": "مستخدم",
-    "never": "أبداً"
+    "never": "أبداً",
+    "unknownZikr": "ذكر غير معروف",
+    "confirmLogoutMsg": "هل أنت متأكد أنك تريد تسجيل الخروج؟ ستفقد جميع التغييرات غير المحفوظة.",
+    "confirmBlockMsg": "هل أنت متأكد أنك تريد {action} المستخدم {user}؟",
+    "confirmDeleteUserMsg": "هل أنت متأكد أنك تريد حذف هذا المستخدم؟ لا يمكن التراجع عن هذا.",
+    "userSavedMsg": "تم حفظ المستخدم بنجاح!",
+    "userSaveFailed": "فشل حفظ المستخدم.",
+    "userDeletedMsg": "تم حذف المستخدم بنجاح!",
+    "userActionMsg": "تم {action} المستخدم بنجاح!",
+    "translationSaveFailed": "فشل حفظ الترجمات. يرجى المحاولة مرة أخرى.",
+    "zikrSaveFailed": "فشل حفظ الذكر. يرجى المحاولة مرة أخرى.",
+    "zikrDeleteFailed": "فشل حذف الذكر. يرجى المحاولة مرة أخرى.",
+    "groupAuth": "المصادقة",
+    "groupZikr": "تطبيق الأذكار",
+    "groupAdmin": "لوحة التحكم",
+    "groupGeneral": "عام",
+    "groupDescriptions": "أوصاف الأذكار",
+    "newPasswordHint": "كلمة مرور جديدة (اتركها فارغة للإبقاء)",
+    "id": "ID"
   }
 }

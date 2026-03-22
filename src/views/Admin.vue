@@ -155,7 +155,7 @@
           <table>
             <thead>
               <tr>
-                <th>ID</th>
+                <th>{{ $t('admin.id') }}</th>
                 <th>{{ $t('admin.username') || 'Username' }}</th>
                 <th>{{ $t('admin.email') || 'Email' }}</th>
                 <th>{{ $t('admin.name') || 'Name' }}</th>
@@ -176,20 +176,20 @@
                 </td>
                 <td>
                   <span class="status-badge" :class="{ active: u.isActive, blocked: !u.isActive }">
-                    {{ u.isActive ? 'Active' : 'Blocked' }}
+                    {{ u.isActive ? $t('admin.active') : $t('admin.blocked') }}
                   </span>
                 </td>
-                <td>{{ u.lastLogin ? formatDate(u.lastLogin) : 'Never' }}</td>
+                <td>{{ u.lastLogin ? formatDate(u.lastLogin) : $t('admin.never') }}</td>
                 <td class="user-actions">
                   <button @click="editUser(u)" class="edit-btn">{{ $t('admin.edit') }}</button>
                   <button @click="toggleUserBlock(u)" class="block-btn" :class="{ unblock: !u.isActive }">
-                    {{ u.isActive ? 'Block' : 'Unblock' }}
+                    {{ u.isActive ? $t('admin.block') : $t('admin.unblock') }}
                   </button>
                   <button @click="deleteUser(u.id)" class="delete-btn">{{ $t('admin.delete') }}</button>
                 </td>
               </tr>
               <tr v-if="users.length === 0">
-                <td colspan="8" style="text-align:center; padding:20px; color:#999;">No users found</td>
+                <td colspan="8" style="text-align:center; padding:20px; color:#999;">{{ $t('admin.noUsersFound') }}</td>
               </tr>
             </tbody>
           </table>
@@ -296,15 +296,15 @@
           </div>
           
           <div class="form-group">
-            <label>{{ editingUser ? ($t('admin.newPassword') || 'New Password (leave empty to keep)') : ($t('admin.password') || 'Password') }}</label>
+            <label>{{ editingUser ? $t('admin.newPasswordHint') : $t('admin.password') }}</label>
             <input type="password" v-model="userForm.password" :required="!editingUser" />
           </div>
           
           <div class="form-group">
             <label>{{ $t('admin.role') || 'Role' }}</label>
             <select v-model="userForm.role" class="form-select">
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
+              <option value="user">{{ $t('admin.user') }}</option>
+              <option value="admin">{{ $t('admin.panel').split(' ')[0] || 'Admin' }}</option>
             </select>
           </div>
           
@@ -324,6 +324,7 @@ import { zikrDescriptions } from '../data/zikrDescriptions'
 import { useAuth } from '@/composables/useAuth'
 import { useModal } from '@/composables/useModal'
 import { useRouter } from 'vue-router'
+import i18n from '@/i18n'
 
 export default {
   name: 'AdminPanel',
@@ -334,12 +335,12 @@ export default {
 
     const handleLogout = async () => {
       const confirmed = await showConfirm(
-        'Are you sure you want to logout? Any unsaved changes will be lost.',
+        i18n.global.t('admin.confirmLogoutMsg'),
         { 
           type: 'warning', 
-          title: 'Confirm Logout',
-          confirmText: 'Logout',
-          cancelText: 'Cancel'
+          title: i18n.global.t('zikr.confirmLogoutTitle'),
+          confirmText: i18n.global.t('admin.logout'),
+          cancelText: i18n.global.t('admin.cancel')
         }
       )
       
@@ -424,8 +425,8 @@ export default {
       return grouped;
     }
   },
-  mounted() {
-    this.loadZikrs()
+  async mounted() {
+    await this.loadZikrs()
     this.loadTranslations()
     this.loadUsers()
     this.loadUserStats()
@@ -434,11 +435,11 @@ export default {
   methods: {
     formatGroupTitle(groupKey) {
       const titleMap = {
-        'auth': 'Authentication',
-        'zikr': 'Zikr App',
-        'admin': 'Admin Panel',
-        'general': 'General',
-        'zikrDescriptions': 'Zikr Descriptions'
+        'auth': this.$t('admin.groupAuth'),
+        'zikr': this.$t('admin.groupZikr'),
+        'admin': this.$t('admin.groupAdmin'),
+        'general': this.$t('admin.groupGeneral'),
+        'zikrDescriptions': this.$t('admin.groupDescriptions')
       };
       
       return titleMap[groupKey] || groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
@@ -526,20 +527,20 @@ export default {
           this.currentTranslations = translationsToSave;
           this.translationsDirty = false
           await this.showAlert(
-            this.$t('admin.translationsSaved') || 'Translations saved successfully!',
-            { type: 'success', title: this.$t('admin.success') || 'Success' }
+            this.$t('admin.translationsSaved'),
+            { type: 'success', title: this.$t('admin.success') }
           )
         } else {
           await this.showAlert(
-            `Failed to save translations: ${data.message}`,
-            { type: 'error', title: this.$t('admin.error') || 'Error' }
+            `${this.$t('admin.translationSaveFailed')}: ${data.message}`,
+            { type: 'error', title: this.$t('admin.error') }
           )
         }
       } catch (error) {
         console.error('Error saving translations:', error)
         await this.showAlert(
-          'Failed to save translations. Please try again.',
-          { type: 'error', title: this.$t('admin.error') || 'Error' }
+          this.$t('admin.translationSaveFailed'),
+          { type: 'error', title: this.$t('admin.error') }
         )
       }
     },
@@ -580,32 +581,32 @@ export default {
           await this.loadZikrs()
           this.closeZikrModal()
           await this.showAlert(
-            this.$t('admin.zikrSaved') || 'Zikr saved successfully!',
-            { type: 'success', title: this.$t('admin.success') || 'Success' }
+            this.$t('admin.zikrSaved'),
+            { type: 'success', title: this.$t('admin.success') }
           )
         } else {
           await this.showAlert(
-            `Failed to save zikr: ${data.message}`,
-            { type: 'error', title: this.$t('admin.error') || 'Error' }
+            `${this.$t('admin.zikrSaveFailed')}: ${data.message}`,
+            { type: 'error', title: this.$t('admin.error') }
           )
         }
       } catch (error) {
         console.error('Error saving zikr:', error)
         await this.showAlert(
-          'Failed to save zikr. Please try again.',
-          { type: 'error', title: this.$t('admin.error') || 'Error' }
+          this.$t('admin.zikrSaveFailed'),
+          { type: 'error', title: this.$t('admin.error') }
         )
       }
     },
 
     async deleteZikr(id) {
       const confirmed = await this.showConfirm(
-        this.$t('admin.confirmDeleteZikr') || 'Are you sure you want to delete this zikr?',
+        this.$t('admin.confirmDeleteZikr'),
         { 
           type: 'danger', 
-          title: this.$t('admin.confirmDelete') || 'Confirm Delete',
-          confirmText: this.$t('admin.delete') || 'Delete',
-          cancelText: this.$t('admin.cancel') || 'Cancel'
+          title: this.$t('admin.confirmDelete'),
+          confirmText: this.$t('admin.delete'),
+          cancelText: this.$t('admin.cancel')
         }
       )
       
@@ -623,20 +624,20 @@ export default {
             // Reload zikrs to get updated data
             await this.loadZikrs()
             await this.showAlert(
-              this.$t('admin.zikrDeleted') || 'Zikr deleted successfully!',
-              { type: 'success', title: this.$t('admin.success') || 'Success' }
+              this.$t('admin.zikrDeleted'),
+              { type: 'success', title: this.$t('admin.success') }
             )
           } else {
             await this.showAlert(
-              `Failed to delete zikr: ${data.message}`,
-              { type: 'error', title: this.$t('admin.error') || 'Error' }
+              `${this.$t('admin.zikrDeleteFailed')}: ${data.message}`,
+              { type: 'error', title: this.$t('admin.error') }
             )
           }
         } catch (error) {
           console.error('Error deleting zikr:', error)
           await this.showAlert(
-            'Failed to delete zikr. Please try again.',
-            { type: 'error', title: this.$t('admin.error') || 'Error' }
+            this.$t('admin.zikrDeleteFailed'),
+            { type: 'error', title: this.$t('admin.error') }
           )
         }
       }
@@ -698,23 +699,23 @@ export default {
           await this.loadUsers()
           this.closeUserModal()
           await this.showAlert(
-            data.message || 'User saved successfully!',
-            { type: 'success', title: this.$t('admin.success') || 'Success' }
+            data.message || this.$t('admin.userSavedMsg'),
+            { type: 'success', title: this.$t('admin.success') }
           )
         } else {
-          await this.showAlert(data.message, { type: 'error', title: this.$t('admin.error') || 'Error' })
+          await this.showAlert(data.message, { type: 'error', title: this.$t('admin.error') })
         }
       } catch (error) {
         console.error('Error saving user:', error)
-        await this.showAlert('Failed to save user.', { type: 'error', title: 'Error' })
+        await this.showAlert(this.$t('admin.userSaveFailed'), { type: 'error', title: this.$t('admin.error') })
       }
     },
 
     async toggleUserBlock(u) {
-      const action = u.isActive ? 'block' : 'unblock'
+      const action = u.isActive ? this.$t('admin.block').toLowerCase() : this.$t('admin.unblock').toLowerCase()
       const confirmed = await this.showConfirm(
-        `Are you sure you want to ${action} ${u.username}?`,
-        { type: 'warning', title: `Confirm ${action}`, confirmText: action.charAt(0).toUpperCase() + action.slice(1), cancelText: 'Cancel' }
+        this.$t('admin.confirmBlockMsg', { action, user: u.username }),
+        { type: 'warning', title: `${action.charAt(0).toUpperCase() + action.slice(1)}?`, confirmText: action.charAt(0).toUpperCase() + action.slice(1), cancelText: this.$t('admin.cancel') }
       )
       if (confirmed) {
         try {
@@ -726,7 +727,7 @@ export default {
           const data = await response.json()
           if (data.success) {
             await this.loadUsers()
-            await this.showAlert(`User ${action}ed successfully!`, { type: 'success', title: 'Success' })
+            await this.showAlert(this.$t('admin.userActionMsg', { action }), { type: 'success', title: this.$t('admin.success') })
           }
         } catch (error) {
           console.error('Error toggling user:', error)
@@ -736,8 +737,8 @@ export default {
 
     async deleteUser(id) {
       const confirmed = await this.showConfirm(
-        'Are you sure you want to delete this user? This cannot be undone.',
-        { type: 'danger', title: 'Confirm Delete', confirmText: 'Delete', cancelText: 'Cancel' }
+        this.$t('admin.confirmDeleteUserMsg'),
+        { type: 'danger', title: this.$t('admin.confirmDelete'), confirmText: this.$t('admin.delete'), cancelText: this.$t('admin.cancel') }
       )
       if (confirmed) {
         try {
@@ -748,9 +749,9 @@ export default {
           const data = await response.json()
           if (data.success) {
             await this.loadUsers()
-            await this.showAlert('User deleted successfully!', { type: 'success', title: 'Success' })
+            await this.showAlert(this.$t('admin.userDeletedMsg'), { type: 'success', title: this.$t('admin.success') })
           } else {
-            await this.showAlert(data.message, { type: 'error', title: 'Error' })
+            await this.showAlert(data.message, { type: 'error', title: this.$t('admin.error') })
           }
         } catch (error) {
           console.error('Error deleting user:', error)
@@ -825,7 +826,7 @@ export default {
 
     getZikrName(zikrId) {
       const zikr = this.zikrs.find(z => z.id === zikrId)
-      return zikr ? zikr.latin : 'Unknown Zikr'
+      return zikr ? zikr.latin : this.$t('admin.unknownZikr')
     },
 
     formatDate(dateString) {
@@ -833,7 +834,7 @@ export default {
     },
 
     formatShortDate(dateString) {
-      return new Date(dateString).toLocaleDateString('en', { month: 'short', day: 'numeric' })
+      return new Date(dateString).toLocaleDateString(this.$i18n.locale, { month: 'short', day: 'numeric' })
     }
   }
 }
@@ -842,7 +843,7 @@ export default {
 <style scoped>
 .admin-panel {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
 }
 
 .admin-header {
@@ -906,9 +907,9 @@ export default {
 }
 
 .admin-nav {
-  background: white;
+  background: var(--bg-card);
   padding: 0 20px;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   gap: 10px;
   overflow-x: auto;
@@ -920,7 +921,7 @@ export default {
   padding: 15px 20px;
   cursor: pointer;
   font-weight: 500;
-  color: #6c757d;
+  color: var(--text-secondary);
   border-bottom: 3px solid transparent;
   transition: all 0.3s ease;
   white-space: nowrap;
@@ -946,7 +947,7 @@ export default {
 
 .section-header h2 {
   margin: 0;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .primary-btn {
@@ -995,10 +996,10 @@ export default {
 }
 
 .zikr-item {
-  background: white;
+  background: var(--bg-card);
   padding: 20px;
   border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1006,19 +1007,19 @@ export default {
 
 .zikr-content h3 {
   margin: 0 0 5px 0;
-  color: #2c3e50;
+  color: var(--text-primary);
   font-size: 1.2rem;
 }
 
 .zikr-latin {
   margin: 0 0 5px 0;
-  color: #6c757d;
+  color: var(--text-secondary);
   font-style: italic;
 }
 
 .zikr-meta {
   margin: 0;
-  color: #6c757d;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -1057,34 +1058,35 @@ export default {
 /* Translations Section */
 .language-selector select {
   padding: 8px 12px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: white;
+  background: var(--bg-card);
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .translations-editor {
-  background: white;
+  background: var(--bg-card);
   padding: 25px;
   border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow);
 }
 
 .translation-group {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 25px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
 }
 
 .translation-group h3 {
   margin: 0 0 20px 0;
-  color: #2c3e50;
+  color: var(--text-primary);
   font-size: 1.2rem;
   font-weight: 600;
   padding-bottom: 10px;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .translation-items {
@@ -1097,19 +1099,21 @@ export default {
 .translation-item label {
   display: block;
   margin-bottom: 8px;
-  color: #495057;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .translation-item textarea {
   width: 100%;
   padding: 12px 15px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;
   resize: vertical;
   min-height: 80px;
   box-sizing: border-box;
+  background: var(--input-bg);
+  color: var(--text-primary);
 }
 
 .translation-item textarea:focus {
@@ -1132,16 +1136,16 @@ export default {
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   padding: 25px;
   border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow);
   text-align: center;
 }
 
 .stat-card h3 {
   margin: 0 0 10px 0;
-  color: #495057;
+  color: var(--text-secondary);
   font-size: 1rem;
 }
 
@@ -1153,15 +1157,15 @@ export default {
 }
 
 .users-table {
-  background: white;
+  background: var(--bg-card);
   padding: 25px;
   border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow);
 }
 
 .users-table h3 {
   margin: 0 0 20px 0;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .users-table table {
@@ -1173,13 +1177,13 @@ export default {
 .users-table td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .users-table th {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   font-weight: 600;
-  color: #495057;
+  color: var(--text-primary);
 }
 
 /* Analytics Section */
@@ -1190,15 +1194,15 @@ export default {
 }
 
 .analytics-card {
-  background: white;
+  background: var(--bg-card);
   padding: 25px;
   border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow);
 }
 
 .analytics-card h3 {
   margin: 0 0 20px 0;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .popular-zikrs {
@@ -1212,11 +1216,11 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid #f1f3f4;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .zikr-name {
-  color: #495057;
+  color: var(--text-primary);
 }
 
 .zikr-count {
@@ -1254,7 +1258,7 @@ export default {
 
 .bar-label {
   font-size: 0.8rem;
-  color: #6c757d;
+  color: var(--text-secondary);
   transform: rotate(-45deg);
   white-space: nowrap;
 }
@@ -1275,7 +1279,7 @@ export default {
 }
 
 .modal {
-  background: white;
+  background: var(--bg-card);
   border-radius: 15px;
   padding: 0;
   max-width: 500px;
@@ -1289,12 +1293,12 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 20px 25px;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .close-btn {
@@ -1302,7 +1306,7 @@ export default {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #6c757d;
+  color: var(--text-secondary);
   width: 30px;
   height: 30px;
   display: flex;
@@ -1313,7 +1317,7 @@ export default {
 }
 
 .close-btn:hover {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
 }
 
 .modal-form {
@@ -1327,17 +1331,19 @@ export default {
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #495057;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .form-group input {
   width: 100%;
   padding: 12px 15px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;
   box-sizing: border-box;
+  background: var(--input-bg);
+  color: var(--text-primary);
 }
 
 .form-group input:focus {
@@ -1351,7 +1357,7 @@ export default {
   justify-content: flex-end;
   gap: 15px;
   padding-top: 20px;
-  border-top: 1px solid #dee2e6;
+  border-top: 1px solid var(--border-color);
 }
 
 /* User Management */
@@ -1420,11 +1426,12 @@ export default {
 .form-select {
   width: 100%;
   padding: 12px 15px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;
   box-sizing: border-box;
-  background: white;
+  background: var(--input-bg);
+  color: var(--text-primary);
 }
 
 .form-select:focus {

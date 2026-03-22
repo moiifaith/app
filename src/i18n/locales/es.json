@@ -74,7 +74,12 @@
     "username": "Usuario",
     "usernamePlaceholder": "Ingresa tu nombre de usuario",
     "firstNamePlaceholder": "Ingresa tu nombre",
-    "lastNamePlaceholder": "Ingresa tu apellido"
+    "lastNamePlaceholder": "Ingresa tu apellido",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+    "loginFailed": "Error de inicio de sesión",
+    "registrationFailed": "Error de registro",
+    "networkError": "Error de red. Por favor, intente de nuevo."
   },
   "zikr": {
     "appName": "Contador de Zikr",
@@ -149,7 +154,11 @@
     "exitConfirm": "Confirmar Salida",
     "confirmLogout": "Estas seguro de que quieres cerrar sesion?",
     "confirmLogoutTitle": "Confirmar Cierre de Sesion",
-    "openApp": "Abrir App"
+    "openApp": "Abrir App",
+    "lightMode": "Modo Claro",
+    "darkMode": "Modo Oscuro",
+    "saveFailed": "Error al guardar el zikr personalizado",
+    "unknownZikr": "Zikr Desconocido"
   },
   "admin": {
     "loginTitle": "Inicio de Sesion Admin",
@@ -220,6 +229,24 @@
     "unblock": "Desbloquear",
     "noUsersFound": "No se encontraron usuarios",
     "user": "Usuario",
-    "never": "Nunca"
+    "never": "Nunca",
+    "unknownZikr": "Zikr Desconocido",
+    "confirmLogoutMsg": "¿Está seguro de que desea cerrar sesión? Se perderán los cambios no guardados.",
+    "confirmBlockMsg": "¿Está seguro de que desea {action} al usuario {user}?",
+    "confirmDeleteUserMsg": "¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.",
+    "userSavedMsg": "¡Usuario guardado exitosamente!",
+    "userSaveFailed": "Error al guardar el usuario.",
+    "userDeletedMsg": "¡Usuario eliminado exitosamente!",
+    "userActionMsg": "¡Usuario {action} exitosamente!",
+    "translationSaveFailed": "Error al guardar las traducciones. Por favor, intente de nuevo.",
+    "zikrSaveFailed": "Error al guardar el zikr. Por favor, intente de nuevo.",
+    "zikrDeleteFailed": "Error al eliminar el zikr. Por favor, intente de nuevo.",
+    "groupAuth": "Autenticación",
+    "groupZikr": "Aplicación de Zikr",
+    "groupAdmin": "Panel de Administración",
+    "groupGeneral": "General",
+    "groupDescriptions": "Descripciones de Zikrs",
+    "newPasswordHint": "Nueva contraseña (dejar vacío para mantener)",
+    "id": "ID"
   }
 }

@@ -59,12 +59,14 @@
 <script>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuth } from '@/composables/useAuth'
 
 export default {
   name: 'UserLogin',
   setup() {
     const router = useRouter()
+    const { t } = useI18n()
     const { login } = useAuth()
     const loading = ref(false)
     const error = ref('')
@@ -87,10 +89,10 @@ export default {
         if (result.success) {
           router.push('/zikr-app')
         } else {
-          error.value = result.error || 'Login failed'
+          error.value = result.error || t('auth.loginFailed')
         }
       } catch (err) {
-        error.value = 'Network error. Please try again.'
+        error.value = t('auth.networkError')
         console.error('Login error:', err)
       } finally {
         loading.value = false
@@ -191,7 +193,7 @@ export default {
 }
 
 .login-btn {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
+  background: #16a34a;
   color: white;
   border: none;
   padding: 15px;

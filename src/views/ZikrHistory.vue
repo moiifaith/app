@@ -350,7 +350,7 @@ export default {
         zikr = zikrData.find(z => z.id === numericZikrId)
       }
       
-      return zikr ? zikr.latin : `Unknown Zikr (ID: ${zikrId})`
+      return zikr ? zikr.latin : this.$t('zikr.unknownZikr')
     },
 
     formatDate(dateString) {
@@ -383,7 +383,7 @@ export default {
 <style scoped>
 .zikr-history {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
 }
 
 .history-header {
@@ -452,11 +452,11 @@ export default {
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   padding: 25px;
   border-radius: 15px;
   text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow);
   min-width: 120px;
 }
 
@@ -469,13 +469,13 @@ export default {
 }
 
 .stat-label {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
 .today-zikrs h2 {
   margin-bottom: 20px;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .zikr-progress-list {
@@ -485,17 +485,17 @@ export default {
 }
 
 .progress-item {
-  background: white;
+  background: var(--bg-card);
   padding: 20px;
   border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #dee2e6;
+  box-shadow: 0 2px 10px var(--shadow);
+  border-left: 4px solid var(--border-color);
   transition: all 0.3s ease;
 }
 
 .progress-item.completed {
   border-left-color: #28a745;
-  background: #f8fff9;
+  background: var(--bg-completed, #f8fff9);
 }
 
 .zikr-info {
@@ -507,12 +507,12 @@ export default {
 
 .zikr-info h3 {
   margin: 0;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .progress-text {
   margin: 0;
-  color: #6c757d;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -548,14 +548,15 @@ export default {
 
 .date-input, .month-input {
   padding: 10px 15px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;
-  background: white;
+  background: var(--bg-card);
+  color: var(--text-primary);
 }
 
 .daily-data h2 {
-  color: #2c3e50;
+  color: var(--text-primary);
   margin-bottom: 20px;
   text-align: center;
 }
@@ -580,7 +581,7 @@ export default {
 }
 
 .summary-stat small {
-  color: #6c757d;
+  color: var(--text-secondary);
 }
 
 .daily-zikrs {
@@ -590,24 +591,24 @@ export default {
 }
 
 .daily-zikr-item {
-  background: white;
+  background: var(--bg-card);
   padding: 20px;
   border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-left: 4px solid #dee2e6;
+  border-left: 4px solid var(--border-color);
 }
 
 .daily-zikr-item.completed {
   border-left-color: #28a745;
-  background: #f8fff9;
+  background: var(--bg-completed, #f8fff9);
 }
 
 .daily-zikr-item h3 {
   margin: 0;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .zikr-stats {
@@ -619,12 +620,12 @@ export default {
 
 .count {
   font-weight: bold;
-  color: #495057;
+  color: var(--text-primary);
 }
 
 .status {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: var(--text-secondary);
 }
 
 .status.completed {
@@ -633,11 +634,11 @@ export default {
 
 /* Monthly View */
 .monthly-summary {
-  background: white;
+  background: var(--bg-card);
   padding: 25px;
   border-radius: 15px;
   margin-bottom: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow);
 }
 
 .summary-grid {
@@ -659,20 +660,20 @@ export default {
 }
 
 .summary-label {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
 .monthly-calendar {
-  background: white;
+  background: var(--bg-card);
   padding: 25px;
   border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--shadow);
 }
 
 .monthly-calendar h3 {
   margin: 0 0 20px 0;
-  color: #2c3e50;
+  color: var(--text-primary);
   text-align: center;
 }
 
@@ -691,8 +692,8 @@ export default {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #f8f9fa;
-  color: #6c757d;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   padding: 5px;
 }
 
@@ -732,7 +733,7 @@ export default {
 .no-data {
   text-align: center;
   padding: 40px;
-  color: #6c757d;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {

@@ -74,7 +74,12 @@
     "username": "Username",
     "usernamePlaceholder": "Enter your username",
     "firstNamePlaceholder": "Enter your first name",
-    "lastNamePlaceholder": "Enter your last name"
+    "lastNamePlaceholder": "Enter your last name",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters long",
+    "loginFailed": "Login failed",
+    "registrationFailed": "Registration failed",
+    "networkError": "Network error. Please try again."
   },
   "zikr": {
     "appName": "Zikr Counter",
@@ -149,7 +154,11 @@
     "exitConfirm": "Exit Confirmation",
     "confirmLogout": "Are you sure you want to logout?",
     "confirmLogoutTitle": "Confirm Logout",
-    "openApp": "Open App"
+    "openApp": "Open App",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "saveFailed": "Failed to save custom zikr",
+    "unknownZikr": "Unknown Zikr"
   },
   "admin": {
     "loginTitle": "Admin Login",
@@ -220,6 +229,24 @@
     "unblock": "Unblock",
     "noUsersFound": "No users found",
     "user": "User",
-    "never": "Never"
+    "never": "Never",
+    "unknownZikr": "Unknown Zikr",
+    "confirmLogoutMsg": "Are you sure you want to logout? Any unsaved changes will be lost.",
+    "confirmBlockMsg": "Are you sure you want to {action} {user}?",
+    "confirmDeleteUserMsg": "Are you sure you want to delete this user? This cannot be undone.",
+    "userSavedMsg": "User saved successfully!",
+    "userSaveFailed": "Failed to save user.",
+    "userDeletedMsg": "User deleted successfully!",
+    "userActionMsg": "User {action} successfully!",
+    "translationSaveFailed": "Failed to save translations. Please try again.",
+    "zikrSaveFailed": "Failed to save zikr. Please try again.",
+    "zikrDeleteFailed": "Failed to delete zikr. Please try again.",
+    "groupAuth": "Authentication",
+    "groupZikr": "Zikr App",
+    "groupAdmin": "Admin Panel",
+    "groupGeneral": "General",
+    "groupDescriptions": "Zikr Descriptions",
+    "newPasswordHint": "New Password (leave empty to keep)",
+    "id": "ID"
   }
 }

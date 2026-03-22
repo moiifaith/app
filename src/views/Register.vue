@@ -130,6 +130,7 @@
 <script>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuth } from '@/composables/useAuth'
 import { migrateLocalStorageData } from '@/utils/dataMigration'
 import { setLanguage, getCurrentLanguage } from '@/i18n'
@@ -138,6 +139,7 @@ export default {
   name: 'UserRegister',
   setup() {
     const router = useRouter()
+    const { t } = useI18n()
     const { register } = useAuth()
     const loading = ref(false)
     const error = ref('')
@@ -155,12 +157,12 @@ export default {
 
     const handleRegister = async () => {
       if (form.password !== form.confirmPassword) {
-        error.value = 'Passwords do not match'
+        error.value = t('auth.passwordMismatch')
         return
       }
 
       if (form.password.length < 8) {
-        error.value = 'Password must be at least 8 characters long'
+        error.value = t('auth.passwordTooShort')
         return
       }
 
@@ -188,10 +190,10 @@ export default {
           
           router.push('/zikr-app')
         } else {
-          error.value = result.error || 'Registration failed'
+          error.value = result.error || t('auth.registrationFailed')
         }
       } catch (err) {
-        error.value = 'Network error. Please try again.'
+        error.value = t('auth.networkError')
         console.error('Registration error:', err)
       } finally {
         loading.value = false
@@ -353,7 +355,7 @@ export default {
 }
 
 .register-btn {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
+  background: #16a34a;
   color: white;
   border: none;
   padding: 15px;

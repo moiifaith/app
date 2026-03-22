@@ -69,6 +69,7 @@ export default {
   --bg-primary: #222222;
   --bg-secondary: #1a1a1a;
   --bg-card: #2a2a2a;
+  --bg-completed: #2d3a2e;
   --text-primary: #e8e8e8;
   --text-secondary: #a0a0a0;
   --border-color: #3a3a3a;

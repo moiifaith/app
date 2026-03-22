@@ -13,7 +13,7 @@
       </router-link>
       
       <div class="header-actions">
-        <button @click="toggleTheme" class="theme-toggle-btn" :title="isDark ? 'Light Mode' : 'Dark Mode'">
+        <button @click="toggleTheme" class="theme-toggle-btn" :title="isDark ? $t('zikr.lightMode') : $t('zikr.darkMode')">
           {{ isDark ? '☀️' : '🌙' }}
         </button>
         <router-link 
@@ -640,11 +640,11 @@ export default {
           this.customZikrForm = { arabic: '', latin: '', defaultRepetitions: 33 }
           await this.loadZikrs()
         } else {
-          alert(data.message || 'Failed to save custom zikr')
+          alert(data.message || this.$t('zikr.saveFailed'))
         }
       } catch (error) {
         console.error('Error saving custom zikr:', error)
-        alert('Failed to save custom zikr')
+        alert(this.$t('zikr.saveFailed'))
       } finally {
         this.savingCustomZikr = false
       }
@@ -843,7 +843,7 @@ export default {
 
 .zikr-card.completed {
   border-left-color: #28a745;
-  background: #f8fff9;
+  background: var(--bg-completed, #f8fff9);
 }
 
 .zikr-header {
@@ -910,7 +910,7 @@ export default {
 }
 
 .number-input button:hover:not(:disabled) {
-  background: #e9ecef;
+  background: var(--bg-secondary);
 }
 
 .number-input button:disabled {
@@ -1089,8 +1089,8 @@ export default {
   background: #16a34a;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 12px 25px;
+  border-radius: 25px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9rem;
@@ -1365,7 +1365,7 @@ export default {
 
 .save-custom-btn {
   flex: 1;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
+  background: #16a34a;
   color: white;
   border: none;
   padding: 12px;

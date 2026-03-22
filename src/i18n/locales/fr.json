@@ -74,7 +74,12 @@
     "username": "Nom d'utilisateur",
     "usernamePlaceholder": "Entrez votre nom d'utilisateur",
     "firstNamePlaceholder": "Entrez votre prenom",
-    "lastNamePlaceholder": "Entrez votre nom de famille"
+    "lastNamePlaceholder": "Entrez votre nom de famille",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères",
+    "loginFailed": "Échec de la connexion",
+    "registrationFailed": "Échec de l'inscription",
+    "networkError": "Erreur réseau. Veuillez réessayer."
   },
   "zikr": {
     "appName": "Compteur de Zikr",
@@ -149,7 +154,11 @@
     "exitConfirm": "Confirmer la Sortie",
     "confirmLogout": "Etes-vous sur de vouloir vous deconnecter ?",
     "confirmLogoutTitle": "Confirmer la Deconnexion",
-    "openApp": "Ouvrir l'App"
+    "openApp": "Ouvrir l'App",
+    "lightMode": "Mode Clair",
+    "darkMode": "Mode Sombre",
+    "saveFailed": "Échec de l'enregistrement du zikr personnalisé",
+    "unknownZikr": "Zikr Inconnu"
   },
   "admin": {
     "loginTitle": "Connexion Admin",
@@ -220,6 +229,24 @@
     "unblock": "Debloquer",
     "noUsersFound": "Aucun utilisateur trouve",
     "user": "Utilisateur",
-    "never": "Jamais"
+    "never": "Jamais",
+    "unknownZikr": "Zikr Inconnu",
+    "confirmLogoutMsg": "Êtes-vous sûr de vouloir vous déconnecter ? Les modifications non enregistrées seront perdues.",
+    "confirmBlockMsg": "Êtes-vous sûr de vouloir {action} l'utilisateur {user} ?",
+    "confirmDeleteUserMsg": "Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.",
+    "userSavedMsg": "Utilisateur enregistré avec succès !",
+    "userSaveFailed": "Échec de l'enregistrement de l'utilisateur.",
+    "userDeletedMsg": "Utilisateur supprimé avec succès !",
+    "userActionMsg": "Utilisateur {action} avec succès !",
+    "translationSaveFailed": "Échec de l'enregistrement des traductions. Veuillez réessayer.",
+    "zikrSaveFailed": "Échec de l'enregistrement du zikr. Veuillez réessayer.",
+    "zikrDeleteFailed": "Échec de la suppression du zikr. Veuillez réessayer.",
+    "groupAuth": "Authentification",
+    "groupZikr": "Application Zikr",
+    "groupAdmin": "Panneau d'Administration",
+    "groupGeneral": "Général",
+    "groupDescriptions": "Descriptions des Zikrs",
+    "newPasswordHint": "Nouveau mot de passe (laisser vide pour conserver)",
+    "id": "ID"
   }
 }

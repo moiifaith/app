@@ -14,7 +14,7 @@
           </div>
         </router-link>
         <div class="nav-links">
-          <button @click="toggleTheme" class="theme-toggle-btn" :title="isDark ? 'Light Mode' : 'Dark Mode'">
+          <button @click="toggleTheme" class="theme-toggle-btn" :title="isDark ? $t('zikr.lightMode') : $t('zikr.darkMode')">
             {{ isDark ? '☀️' : '🌙' }}
           </button>
           <router-link to="/zikrs" class="nav-link app-link">{{ $t('zikr.openApp') }}</router-link>
@@ -56,7 +56,7 @@
           <div class="phone-screen">
             <div class="mock-header">
               <span class="mock-logo">📿</span>
-              <span class="mock-title">Zikr Counter</span>
+              <span class="mock-title">{{ $t('zikr.appName') }}</span>
             </div>
             <div class="mock-counter">
               <div class="mock-circle">
@@ -301,7 +301,6 @@ export default {
 }
 
 .nav-link {
-  color: white;
   text-decoration: none;
   font-weight: 700;
   padding: 12px 24px;
@@ -322,7 +321,7 @@ export default {
 }
 
 .app-link {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%) !important;
+  background: #16a34a !important;
   color: white !important;
   border-color: transparent !important;
   box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
@@ -484,27 +483,11 @@ export default {
 }
 
 .cta-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s;
-}
-
-.cta-button:hover::before {
-  left: 100%;
+  display: none;
 }
 
 .cta-button.primary {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
+  background: #16a34a;
   box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
   border-color: transparent;
 }

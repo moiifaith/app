@@ -74,7 +74,12 @@
     "username": "Korisničko ime",
     "usernamePlaceholder": "Unesite vaše korisničko ime",
     "firstNamePlaceholder": "Unesite vaše ime",
-    "lastNamePlaceholder": "Unesite vaše prezime"
+    "lastNamePlaceholder": "Unesite vaše prezime",
+    "passwordMismatch": "Lozinke se ne podudaraju",
+    "passwordTooShort": "Lozinka mora imati najmanje 8 znakova",
+    "loginFailed": "Prijava nije uspjela",
+    "registrationFailed": "Registracija nije uspjela",
+    "networkError": "Greška mreže. Molimo pokušajte ponovo."
   },
   "zikr": {
     "appName": "Brojač Zikra",
@@ -83,7 +88,7 @@
     "featuresTitle": "Mogućnosti",
     "feature1Title": "Tradicionalni Zikrovi",
     "feature1Description": "Pristup autentičnim islamskim zikrovima sa arapskim tekstom i transliteracijom",
-    "feature2Title": "Digitalna Tesbih",
+    "feature2Title": "Digitalni Tespih",
     "feature2Description": "Brojite Vaša ponavljanja lako koristeći naš digitalni brojač",
     "feature3Title": "Praćenje Napretka",
     "feature3Description": "Pratite Vaš dnevni napredak i pregledajte historijske podatke",
@@ -149,7 +154,11 @@
     "exitConfirm": "Potvrda Izlaska",
     "confirmLogout": "Da li ste sigurni da se želite odjaviti?",
     "confirmLogoutTitle": "Potvrda Odjave",
-    "openApp": "Otvori Aplikaciju"
+    "openApp": "Otvori Aplikaciju",
+    "lightMode": "Svijetli način",
+    "darkMode": "Tamni način",
+    "saveFailed": "Spremanje prilagođenog zikra nije uspjelo",
+    "unknownZikr": "Nepoznati zikr"
   },
   "admin": {
     "loginTitle": "Admin Prijava",
@@ -220,6 +229,24 @@
     "unblock": "Deblokiraj",
     "noUsersFound": "Nije pronađen nijedan korisnik",
     "user": "Korisnik",
-    "never": "Nikada"
+    "never": "Nikada",
+    "unknownZikr": "Nepoznati zikr",
+    "confirmLogoutMsg": "Jeste li sigurni da se želite odjaviti? Sve nespremljene promjene će biti izgubljene.",
+    "confirmBlockMsg": "Jeste li sigurni da želite {action} korisnika {user}?",
+    "confirmDeleteUserMsg": "Jeste li sigurni da želite obrisati ovog korisnika? Ovo se ne može poništiti.",
+    "userSavedMsg": "Korisnik uspješno sačuvan!",
+    "userSaveFailed": "Spremanje korisnika nije uspjelo.",
+    "userDeletedMsg": "Korisnik uspješno obrisan!",
+    "userActionMsg": "Korisnik uspješno {action}!",
+    "translationSaveFailed": "Spremanje prijevoda nije uspjelo. Molimo pokušajte ponovo.",
+    "zikrSaveFailed": "Spremanje zikra nije uspjelo. Molimo pokušajte ponovo.",
+    "zikrDeleteFailed": "Brisanje zikra nije uspjelo. Molimo pokušajte ponovo.",
+    "groupAuth": "Autentifikacija",
+    "groupZikr": "Zikr Aplikacija",
+    "groupAdmin": "Admin Panel",
+    "groupGeneral": "Općenito",
+    "groupDescriptions": "Opisi Zikrova",
+    "newPasswordHint": "Nova lozinka (ostavite prazno za zadržavanje)",
+    "id": "ID"
   }
 }
