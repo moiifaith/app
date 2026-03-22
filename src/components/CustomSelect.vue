@@ -162,18 +162,18 @@ export default {
 }
 
 .select-option:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   color: white;
 }
 
 .select-option.selected {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
   font-weight: 600;
 }
 
 .select-option.selected:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   color: white;
 }
 
@@ -215,6 +215,6 @@ export default {
 .landing-theme .select-trigger:hover,
 .landing-theme .custom-select.active .select-trigger {
   background: white;
-  border-color: rgba(102, 126, 234, 0.3);
+  border-color: rgba(22, 163, 74, 0.3);
 }
 </style>

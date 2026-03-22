@@ -113,7 +113,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   padding: 20px;
 }
 
@@ -172,7 +172,7 @@ export default {
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #16a34a;
 }
 
 .form-group input:disabled {
@@ -191,7 +191,7 @@ export default {
 }
 
 .login-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   color: white;
   border: none;
   padding: 15px;
@@ -208,7 +208,7 @@ export default {
 
 .login-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 20px rgba(22, 163, 74, 0.3);
 }
 
 .login-btn:disabled {
@@ -245,7 +245,7 @@ export default {
 }
 
 .auth-links a {
-  color: #667eea;
+  color: #16a34a;
   text-decoration: none;
   font-weight: 500;
 }

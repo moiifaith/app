@@ -127,6 +127,7 @@
 <script>
 import { useAuth } from '@/composables/useAuth'
 import CustomSelect from '@/components/CustomSelect.vue'
+import { setLanguage, getCurrentLanguage } from '@/i18n'
 
 export default {
   name: 'LandingPage',
@@ -155,14 +156,11 @@ export default {
     }
   },
   mounted() {
-    // Initialize current language from i18n or localStorage
-    this.currentLanguage = this.$i18n.locale || localStorage.getItem('selectedLanguage') || 'en'
+    this.currentLanguage = getCurrentLanguage() || 'en'
   },
   watch: {
-    currentLanguage(newLanguage) {
-      console.log('LandingPage: language changed to', newLanguage)
-      this.$i18n.locale = newLanguage
-      localStorage.setItem('selectedLanguage', newLanguage)
+    async currentLanguage(newLanguage) {
+      await setLanguage(newLanguage)
     }
   }
 }
@@ -252,7 +250,7 @@ export default {
   border: 2px solid white;
   white-space: nowrap;
   background: rgba(255, 255, 255, 0.9);
-  color: #667eea;
+  color: #16a34a;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -264,16 +262,16 @@ export default {
 }
 
 .app-link {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%) !important;
   color: white !important;
   border-color: transparent !important;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
 }
 
 .app-link:hover {
   background: linear-gradient(135deg, #5a6fd8 0%, #6a4c93 100%) !important;
   color: white !important;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
 }
 
 .container {
@@ -288,7 +286,7 @@ export default {
   align-items: center;
   min-height: 100vh;
   padding: 100px 20px 60px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   color: white;
 }
 
@@ -367,8 +365,8 @@ export default {
 }
 
 .cta-button.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
+  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
   border-color: transparent;
 }
 
@@ -389,7 +387,7 @@ export default {
 }
 
 .cta-button.primary:hover {
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
 }
 
 /* Features Section */
@@ -479,7 +477,7 @@ export default {
 
 /* Final CTA Section */
 .final-cta {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   color: white;
   padding: 80px 0;
   text-align: center;

@@ -1,16 +1,35 @@
 // Zikr management endpoint
+import { verifyToken } from '../auth/jwt-utils.js';
+
 export async function onRequestGet(context) {
-  const { env } = context;
+  const { request, env } = context;
   
   try {
+    // Optionally get user from token to include custom zikrs
+    let userId = null;
+    const authHeader = request.headers.get('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const decoded = await verifyToken(authHeader.substring(7));
+      if (decoded) userId = decoded.id;
+    }
+
     // Fetch from D1 database
     let zikrs = [];
     
     if (env.zikr_database) {
       try {
-        const result = await env.zikr_database.prepare(
-          "SELECT id, arabic, latin, identifier, default_repetitions as defaultRepetitions FROM zikrs WHERE is_active = 1 ORDER BY id"
-        ).all();
+        // Get default (non-custom) active zikrs plus user's own custom zikrs
+        let query = "SELECT id, arabic, latin, identifier, default_repetitions as defaultRepetitions, is_custom as isCustom, user_id as userId FROM zikrs WHERE is_active = 1 AND (is_custom = 0";
+        const bindings = [];
+        
+        if (userId) {
+          query += " OR user_id = ?";
+          bindings.push(userId);
+        }
+        query += ") ORDER BY is_custom, id";
+
+        const stmt = env.zikr_database.prepare(query);
+        const result = bindings.length > 0 ? await stmt.bind(...bindings).all() : await stmt.all();
         
         if (result.results && result.results.length > 0) {
           zikrs = result.results;
@@ -122,7 +141,7 @@ export async function onRequestPost(context) {
   const { request, env } = context;
   
   try {
-    // Verify admin token
+    // Verify token (admin or regular user)
     const authHeader = request.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response(JSON.stringify({
@@ -137,12 +156,23 @@ export async function onRequestPost(context) {
       });
     }
     
-    // TODO: Verify token and check admin role
-    // const token = authHeader.substring(7);
-    // For now, assume token is valid for demo
+    const token = authHeader.substring(7);
+    const decoded = await verifyToken(token);
+    if (!decoded) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Invalid token'
+      }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
     
     const zikrData = await request.json();
-    const { arabic, latin, identifier, defaultRepetitions } = zikrData;
+    const { arabic, latin, identifier, defaultRepetitions, isCustom } = zikrData;
     
     if (!arabic || !latin || !identifier) {
       return new Response(JSON.stringify({
@@ -157,11 +187,15 @@ export async function onRequestPost(context) {
       });
     }
     
+    // If user is not admin, force it to be a custom zikr
+    const custom = decoded.role === 'admin' ? (isCustom ? 1 : 0) : 1;
+    const userId = custom ? decoded.id : null;
+    
     // Save to D1 database
     const result = await env.zikr_database.prepare(
-      `INSERT INTO zikrs (arabic, latin, identifier, default_repetitions, is_custom, is_active) 
-       VALUES (?, ?, ?, ?, 0, 1)`
-    ).bind(arabic, latin, identifier, defaultRepetitions || 33).run();
+      `INSERT INTO zikrs (arabic, latin, identifier, default_repetitions, is_custom, user_id, is_active) 
+       VALUES (?, ?, ?, ?, ?, ?, 1)`
+    ).bind(arabic, latin, identifier, defaultRepetitions || 33, custom, userId).run();
     
     if (result.success) {
       return new Response(JSON.stringify({

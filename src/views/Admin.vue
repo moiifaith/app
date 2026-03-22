@@ -130,41 +130,66 @@
       <!-- Users Management -->
       <div v-if="currentSection === 'users'" class="section">
         <div class="section-header">
-          <h2>{{ $t('admin.userAnalytics') }}</h2>
+          <h2>{{ $t('admin.manageUsers') }}</h2>
+          <button @click="showAddUserModal = true" class="primary-btn">
+            + {{ $t('admin.addUser') || 'Add User' }}
+          </button>
         </div>
 
         <div class="users-stats">
           <div class="stat-card">
             <h3>{{ $t('admin.totalUsers') }}</h3>
-            <p class="stat-number">{{ userStats.totalUsers }}</p>
+            <p class="stat-number">{{ users.length }}</p>
           </div>
           <div class="stat-card">
             <h3>{{ $t('admin.activeUsers') }}</h3>
-            <p class="stat-number">{{ userStats.activeUsers }}</p>
+            <p class="stat-number">{{ users.filter(u => u.isActive).length }}</p>
           </div>
           <div class="stat-card">
-            <h3>{{ $t('admin.totalSessions') }}</h3>
-            <p class="stat-number">{{ userStats.totalSessions }}</p>
+            <h3>{{ $t('admin.adminCount') || 'Admins' }}</h3>
+            <p class="stat-number">{{ users.filter(u => u.role === 'admin').length }}</p>
           </div>
         </div>
 
         <div class="users-table">
-          <h3>{{ $t('admin.recentActivity') }}</h3>
           <table>
             <thead>
               <tr>
-                <th>{{ $t('admin.date') }}</th>
-                <th>{{ $t('admin.zikr') }}</th>
-                <th>{{ $t('admin.completions') }}</th>
-                <th>{{ $t('admin.totalCount') }}</th>
+                <th>ID</th>
+                <th>{{ $t('admin.username') || 'Username' }}</th>
+                <th>{{ $t('admin.email') || 'Email' }}</th>
+                <th>{{ $t('admin.name') || 'Name' }}</th>
+                <th>{{ $t('admin.role') || 'Role' }}</th>
+                <th>{{ $t('admin.status') || 'Status' }}</th>
+                <th>{{ $t('admin.lastLogin') || 'Last Login' }}</th>
+                <th>{{ $t('admin.actions') || 'Actions' }}</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="activity in recentActivity" :key="activity.id">
-                <td>{{ formatDate(activity.date) }}</td>
-                <td>{{ getZikrName(activity.zikrId) }}</td>
-                <td>{{ activity.completions }}</td>
-                <td>{{ activity.totalCount }}</td>
+              <tr v-for="u in users" :key="u.id">
+                <td>{{ u.id }}</td>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.firstName }} {{ u.lastName }}</td>
+                <td>
+                  <span class="role-badge" :class="u.role">{{ u.role }}</span>
+                </td>
+                <td>
+                  <span class="status-badge" :class="{ active: u.isActive, blocked: !u.isActive }">
+                    {{ u.isActive ? 'Active' : 'Blocked' }}
+                  </span>
+                </td>
+                <td>{{ u.lastLogin ? formatDate(u.lastLogin) : 'Never' }}</td>
+                <td class="user-actions">
+                  <button @click="editUser(u)" class="edit-btn">{{ $t('admin.edit') }}</button>
+                  <button @click="toggleUserBlock(u)" class="block-btn" :class="{ unblock: !u.isActive }">
+                    {{ u.isActive ? 'Block' : 'Unblock' }}
+                  </button>
+                  <button @click="deleteUser(u.id)" class="delete-btn">{{ $t('admin.delete') }}</button>
+                </td>
+              </tr>
+              <tr v-if="users.length === 0">
+                <td colspan="8" style="text-align:center; padding:20px; color:#999;">No users found</td>
               </tr>
             </tbody>
           </table>
@@ -240,6 +265,56 @@
         </form>
       </div>
     </div>
+
+    <!-- Add/Edit User Modal -->
+    <div v-if="showAddUserModal || editingUser" class="modal-overlay" @click="closeUserModal">
+      <div class="modal" @click.stop>
+        <div class="modal-header">
+          <h3>{{ editingUser ? ($t('admin.editUser') || 'Edit User') : ($t('admin.addUser') || 'Add User') }}</h3>
+          <button @click="closeUserModal" class="close-btn">&times;</button>
+        </div>
+        
+        <form @submit.prevent="saveUser" class="modal-form">
+          <div class="form-group">
+            <label>{{ $t('admin.email') || 'Email' }}</label>
+            <input type="email" v-model="userForm.email" required />
+          </div>
+          
+          <div class="form-group">
+            <label>{{ $t('admin.username') || 'Username' }}</label>
+            <input type="text" v-model="userForm.username" required />
+          </div>
+
+          <div class="form-group">
+            <label>{{ $t('auth.firstName') || 'First Name' }}</label>
+            <input type="text" v-model="userForm.firstName" />
+          </div>
+
+          <div class="form-group">
+            <label>{{ $t('auth.lastName') || 'Last Name' }}</label>
+            <input type="text" v-model="userForm.lastName" />
+          </div>
+          
+          <div class="form-group">
+            <label>{{ editingUser ? ($t('admin.newPassword') || 'New Password (leave empty to keep)') : ($t('admin.password') || 'Password') }}</label>
+            <input type="password" v-model="userForm.password" :required="!editingUser" />
+          </div>
+          
+          <div class="form-group">
+            <label>{{ $t('admin.role') || 'Role' }}</label>
+            <select v-model="userForm.role" class="form-select">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="submit" class="primary-btn">{{ $t('admin.save') }}</button>
+            <button type="button" @click="closeUserModal" class="secondary-btn">{{ $t('admin.cancel') }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -297,6 +372,17 @@ export default {
       selectedLanguage: 'en',
       currentTranslations: {},
       translationsDirty: false,
+      users: [],
+      showAddUserModal: false,
+      editingUser: null,
+      userForm: {
+        email: '',
+        username: '',
+        firstName: '',
+        lastName: '',
+        password: '',
+        role: 'user'
+      },
       userStats: {
         totalUsers: 0,
         activeUsers: 0,
@@ -341,6 +427,7 @@ export default {
   mounted() {
     this.loadZikrs()
     this.loadTranslations()
+    this.loadUsers()
     this.loadUserStats()
     this.loadAnalytics()
   },
@@ -555,6 +642,122 @@ export default {
       }
     },
 
+    // --- User Management ---
+    async loadUsers() {
+      try {
+        const response = await fetch('/api/users', {
+          headers: { ...this.getAuthHeaders() }
+        })
+        const data = await response.json()
+        if (data.success) {
+          this.users = data.data
+        }
+      } catch (error) {
+        console.error('Error loading users:', error)
+      }
+    },
+
+    editUser(u) {
+      this.editingUser = u
+      this.userForm = {
+        id: u.id,
+        email: u.email,
+        username: u.username,
+        firstName: u.firstName || '',
+        lastName: u.lastName || '',
+        password: '',
+        role: u.role
+      }
+    },
+
+    closeUserModal() {
+      this.showAddUserModal = false
+      this.editingUser = null
+      this.userForm = { email: '', username: '', firstName: '', lastName: '', password: '', role: 'user' }
+    },
+
+    async saveUser() {
+      try {
+        const method = this.editingUser ? 'PUT' : 'POST'
+        const body = this.editingUser
+          ? { ...this.userForm, id: this.editingUser.id }
+          : { ...this.userForm }
+
+        // Remove empty password for edits
+        if (this.editingUser && !body.password) {
+          delete body.password
+        }
+
+        const response = await fetch('/api/users', {
+          method,
+          headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() },
+          body: JSON.stringify(body)
+        })
+        const data = await response.json()
+        if (data.success) {
+          await this.loadUsers()
+          this.closeUserModal()
+          await this.showAlert(
+            data.message || 'User saved successfully!',
+            { type: 'success', title: this.$t('admin.success') || 'Success' }
+          )
+        } else {
+          await this.showAlert(data.message, { type: 'error', title: this.$t('admin.error') || 'Error' })
+        }
+      } catch (error) {
+        console.error('Error saving user:', error)
+        await this.showAlert('Failed to save user.', { type: 'error', title: 'Error' })
+      }
+    },
+
+    async toggleUserBlock(u) {
+      const action = u.isActive ? 'block' : 'unblock'
+      const confirmed = await this.showConfirm(
+        `Are you sure you want to ${action} ${u.username}?`,
+        { type: 'warning', title: `Confirm ${action}`, confirmText: action.charAt(0).toUpperCase() + action.slice(1), cancelText: 'Cancel' }
+      )
+      if (confirmed) {
+        try {
+          const response = await fetch('/api/users', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() },
+            body: JSON.stringify({ id: u.id, isActive: !u.isActive })
+          })
+          const data = await response.json()
+          if (data.success) {
+            await this.loadUsers()
+            await this.showAlert(`User ${action}ed successfully!`, { type: 'success', title: 'Success' })
+          }
+        } catch (error) {
+          console.error('Error toggling user:', error)
+        }
+      }
+    },
+
+    async deleteUser(id) {
+      const confirmed = await this.showConfirm(
+        'Are you sure you want to delete this user? This cannot be undone.',
+        { type: 'danger', title: 'Confirm Delete', confirmText: 'Delete', cancelText: 'Cancel' }
+      )
+      if (confirmed) {
+        try {
+          const response = await fetch(`/api/users?id=${id}`, {
+            method: 'DELETE',
+            headers: { ...this.getAuthHeaders() }
+          })
+          const data = await response.json()
+          if (data.success) {
+            await this.loadUsers()
+            await this.showAlert('User deleted successfully!', { type: 'success', title: 'Success' })
+          } else {
+            await this.showAlert(data.message, { type: 'error', title: 'Error' })
+          }
+        } catch (error) {
+          console.error('Error deleting user:', error)
+        }
+      }
+    },
+
     loadUserStats() {
       // In production, this would fetch from your analytics API
       // For demo, generate some sample data based on localStorage
@@ -643,7 +846,7 @@ export default {
 }
 
 .admin-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   color: white;
   padding: 20px;
   display: flex;
@@ -724,8 +927,8 @@ export default {
 }
 
 .nav-btn:hover, .nav-btn.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
+  color: #16a34a;
+  border-bottom-color: #16a34a;
 }
 
 .admin-main {
@@ -747,7 +950,7 @@ export default {
 }
 
 .primary-btn {
-  background: #667eea;
+  background: #16a34a;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -770,8 +973,8 @@ export default {
 
 .secondary-btn {
   background: transparent;
-  color: #667eea;
-  border: 1px solid #667eea;
+  color: #16a34a;
+  border: 1px solid #16a34a;
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;
@@ -780,7 +983,7 @@ export default {
 }
 
 .secondary-btn:hover {
-  background: #667eea;
+  background: #16a34a;
   color: white;
 }
 
@@ -911,8 +1114,8 @@ export default {
 
 .translation-item textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 .translation-actions {
@@ -945,7 +1148,7 @@ export default {
 .stat-number {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #667eea;
+  color: #16a34a;
   margin: 0;
 }
 
@@ -1017,7 +1220,7 @@ export default {
 }
 
 .zikr-count {
-  background: #667eea;
+  background: #16a34a;
   color: white;
   padding: 4px 8px;
   border-radius: 12px;
@@ -1042,7 +1245,7 @@ export default {
 }
 
 .bar-fill {
-  background: #667eea;
+  background: #16a34a;
   width: 100%;
   min-height: 2px;
   border-radius: 2px 2px 0 0;
@@ -1139,8 +1342,8 @@ export default {
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 .modal-actions {
@@ -1149,6 +1352,85 @@ export default {
   gap: 15px;
   padding-top: 20px;
   border-top: 1px solid #dee2e6;
+}
+
+/* User Management */
+.role-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.role-badge.admin {
+  background: #ffeeba;
+  color: #856404;
+}
+
+.role-badge.user {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.blocked {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.user-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.block-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  background: #dc3545;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.block-btn.unblock {
+  background: #28a745;
+}
+
+.block-btn:hover {
+  opacity: 0.85;
+}
+
+.form-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background: white;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 @media (max-width: 768px) {

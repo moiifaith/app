@@ -387,7 +387,7 @@ export default {
 }
 
 .history-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   color: white;
   padding: 20px;
   display: flex;
@@ -464,7 +464,7 @@ export default {
   display: block;
   font-size: 2rem;
   font-weight: bold;
-  color: #667eea;
+  color: #16a34a;
   margin-bottom: 5px;
 }
 
@@ -531,7 +531,7 @@ export default {
 
 .progress-fill {
   height: 100%;
-  background: #667eea;
+  background: #16a34a;
   border-radius: 3px;
   transition: width 0.3s ease;
 }
@@ -575,7 +575,7 @@ export default {
   display: block;
   font-size: 1.8rem;
   font-weight: bold;
-  color: #667eea;
+  color: #16a34a;
   margin-bottom: 5px;
 }
 
@@ -654,7 +654,7 @@ export default {
   display: block;
   font-size: 2rem;
   font-weight: bold;
-  color: #667eea;
+  color: #16a34a;
   margin-bottom: 5px;
 }
 
@@ -712,7 +712,7 @@ export default {
 }
 
 .calendar-day.today {
-  border: 2px solid #667eea;
+  border: 2px solid #16a34a;
 }
 
 .calendar-day:hover {

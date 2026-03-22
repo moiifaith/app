@@ -64,19 +64,50 @@
         </div>
       </section>
 
+      <!-- Zikr Sequences -->
+      <section v-if="sequences.length > 0 || isAuthenticated" class="sequences-section">
+        <div class="sequences-header">
+          <h2>{{ $t('zikr.mySequences') || 'My Sequences' }}</h2>
+          <button v-if="isAuthenticated" @click="showSequenceModal = true" class="add-custom-btn">
+            + {{ $t('zikr.newSequence') || 'New Sequence' }}
+          </button>
+        </div>
+        <div v-if="sequences.length === 0" class="empty-sequences">
+          <p>{{ $t('zikr.noSequences') || 'Create a sequence to group zikrs together (e.g., Morning Adhkar)' }}</p>
+        </div>
+        <div v-else class="sequence-cards">
+          <div v-for="(seq, idx) in sequences" :key="idx" class="sequence-card">
+            <div class="sequence-info">
+              <h3>{{ seq.name }}</h3>
+              <p>{{ seq.zikrs.length }} {{ $t('zikr.zikrs') || 'zikrs' }} &middot; {{ getTotalSeqReps(seq) }} {{ $t('zikr.totalReps') || 'total reps' }}</p>
+            </div>
+            <div class="sequence-actions">
+              <button @click="startSequence(seq)" class="start-seq-btn">{{ $t('zikr.start') }}</button>
+              <button @click="deleteSequence(idx)" class="delete-seq-btn">&times;</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Zikr List -->
       <section class="zikr-list">
-        <h2>{{ $t('zikr.availableZikrs') }}</h2>
+        <div class="zikr-list-header">
+          <h2>{{ $t('zikr.availableZikrs') }}</h2>
+          <button v-if="isAuthenticated" @click="showCustomZikrModal = true" class="add-custom-btn">
+            + {{ $t('zikr.addCustomZikr') || 'Add Custom Zikr' }}
+          </button>
+        </div>
         <div class="zikr-grid">
           <div 
             v-for="zikr in paginatedZikrs" 
             :key="zikr.id"
             class="zikr-card"
-            :class="{ completed: isZikrCompletedToday(zikr.id) }"
+            :class="{ completed: isZikrCompletedToday(zikr.id), custom: zikr.isCustom }"
           >
             <div class="zikr-header">
               <h3 class="zikr-title-arabic">{{ zikr.arabic }}</h3>
               <h4 class="zikr-title-latin">{{ zikr.latin }}</h4>
+              <span v-if="zikr.isCustom" class="custom-badge">{{ $t('zikr.custom') || 'Custom' }}</span>
             </div>
             
             <div class="zikr-description">
@@ -142,6 +173,89 @@
         </div>
       </section>
     </main>
+
+    <!-- Custom Zikr Modal -->
+    <div v-if="showCustomZikrModal" class="modal-overlay" @click="showCustomZikrModal = false">
+      <div class="custom-zikr-modal" @click.stop>
+        <div class="modal-header">
+          <h3>{{ $t('zikr.addCustomZikr') || 'Add Custom Zikr' }}</h3>
+          <button @click="showCustomZikrModal = false" class="close-modal-btn">&times;</button>
+        </div>
+        <form @submit.prevent="saveCustomZikr" class="custom-zikr-form">
+          <div class="form-group">
+            <label>{{ $t('zikr.arabicText') || 'Arabic Text' }}</label>
+            <input type="text" v-model="customZikrForm.arabic" required dir="rtl" />
+          </div>
+          <div class="form-group">
+            <label>{{ $t('zikr.latinText') || 'Latin/Transliteration' }}</label>
+            <input type="text" v-model="customZikrForm.latin" required />
+          </div>
+          <div class="form-group">
+            <label>{{ $t('zikr.repetitions') || 'Repetitions' }}</label>
+            <input type="number" v-model.number="customZikrForm.defaultRepetitions" min="1" max="1000" />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="save-custom-btn" :disabled="savingCustomZikr">
+              {{ savingCustomZikr ? '...' : ($t('zikr.save') || 'Save') }}
+            </button>
+            <button type="button" @click="showCustomZikrModal = false" class="cancel-btn">
+              {{ $t('zikr.cancel') || 'Cancel' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Sequence Modal -->
+    <div v-if="showSequenceModal" class="modal-overlay" @click="showSequenceModal = false">
+      <div class="custom-zikr-modal sequence-modal" @click.stop>
+        <div class="modal-header">
+          <h3>{{ $t('zikr.newSequence') || 'Create Sequence' }}</h3>
+          <button @click="showSequenceModal = false" class="close-modal-btn">&times;</button>
+        </div>
+        <div class="custom-zikr-form">
+          <div class="form-group">
+            <label>{{ $t('zikr.sequenceName') || 'Sequence Name' }}</label>
+            <input type="text" v-model="sequenceForm.name" placeholder="e.g., Morning Adhkar" required />
+          </div>
+          <div class="form-group">
+            <label>{{ $t('zikr.selectZikrs') || 'Select Zikrs' }}</label>
+            <div class="zikr-picker">
+              <div 
+                v-for="zikr in zikrs" 
+                :key="'pick-' + zikr.id" 
+                class="zikr-pick-item"
+                :class="{ selected: isInSequence(zikr.id) }"
+                @click="toggleSequenceZikr(zikr)"
+              >
+                <span class="pick-check">{{ isInSequence(zikr.id) ? '✓' : '' }}</span>
+                <span class="pick-name">{{ zikr.latin }}</span>
+                <span class="pick-arabic">{{ zikr.arabic }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-if="sequenceForm.zikrs.length > 0" class="selected-sequence-zikrs">
+            <label>{{ $t('zikr.sequenceOrder') || 'Sequence Order' }} ({{ sequenceForm.zikrs.length }})</label>
+            <div v-for="(sz, i) in sequenceForm.zikrs" :key="'seq-' + i" class="seq-item">
+              <span>{{ i + 1 }}. {{ sz.latin }} ({{ sz.reps }}x)</span>
+              <input type="number" v-model.number="sz.reps" min="1" max="1000" class="seq-reps-input" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button 
+              @click="saveSequence" 
+              class="save-custom-btn"
+              :disabled="!sequenceForm.name || sequenceForm.zikrs.length === 0"
+            >
+              {{ $t('zikr.save') || 'Save' }}
+            </button>
+            <button @click="showSequenceModal = false" class="cancel-btn">
+              {{ $t('zikr.cancel') || 'Cancel' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -153,6 +267,7 @@ import { useModal } from '@/composables/useModal'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import CustomSelect from '@/components/CustomSelect.vue'
+import { setLanguage, getCurrentLanguage } from '@/i18n'
 
 export default {
   name: 'ZikrApp',
@@ -160,7 +275,7 @@ export default {
     CustomSelect
   },
   setup() {
-    const { isAuthenticated, user, logout, isAdmin: checkIsAdmin } = useAuth()
+    const { isAuthenticated, user, logout, isAdmin: checkIsAdmin, getAuthHeaders } = useAuth()
     const { showConfirm } = useModal()
     const router = useRouter()
     
@@ -190,7 +305,8 @@ export default {
       isAuthenticated,
       user,
       isAdmin,
-      handleLogout
+      handleLogout,
+      getAuthHeaders
     }
   },
   computed: {
@@ -237,14 +353,27 @@ export default {
       descriptions: {},
       // Pagination
       currentPage: 1,
-      itemsPerPage: 6
+      itemsPerPage: 6,
+      // Custom Zikr
+      showCustomZikrModal: false,
+      savingCustomZikr: false,
+      customZikrForm: {
+        arabic: '',
+        latin: '',
+        defaultRepetitions: 33
+      },
+      // Sequences
+      sequences: [],
+      showSequenceModal: false,
+      sequenceForm: {
+        name: '',
+        zikrs: []
+      }
     }
   },
   watch: {
-    currentLanguage(newLanguage) {
-      console.log('ZikrApp: language changed to', newLanguage)
-      localStorage.setItem('selectedLanguage', newLanguage)
-      this.$i18n.locale = newLanguage
+    async currentLanguage(newLanguage) {
+      await setLanguage(newLanguage)
       this.descriptions = zikrDescriptions[newLanguage] || zikrDescriptions.en
     }
   },
@@ -254,11 +383,14 @@ export default {
   methods: {
     async initializeApp() {
       // Load language and descriptions
-      this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en'
+      this.currentLanguage = getCurrentLanguage() || 'en'
       this.descriptions = zikrDescriptions[this.currentLanguage] || zikrDescriptions.en
       
       // Load zikrs from API/database
       await this.loadZikrs()
+      
+      // Load saved sequences
+      this.loadSequences()
     },
 
     async loadZikrs() {
@@ -340,7 +472,8 @@ export default {
     },
     
     getZikrDescription(identifier) {
-      return this.descriptions[identifier] || ''
+      if (!identifier) return ''
+      return this.descriptions[identifier] || zikrDescriptions.en[identifier] || ''
     },
     
     increaseReps(zikrId) {
@@ -403,6 +536,109 @@ export default {
       if (this.currentPage > 1) {
         this.currentPage--
       }
+    },
+
+    // --- Sequence Methods ---
+    loadSequences() {
+      try {
+        this.sequences = JSON.parse(localStorage.getItem('zikrSequences') || '[]')
+      } catch { this.sequences = [] }
+    },
+
+    saveSequencesToStorage() {
+      localStorage.setItem('zikrSequences', JSON.stringify(this.sequences))
+    },
+
+    isInSequence(zikrId) {
+      return this.sequenceForm.zikrs.some(z => z.id === zikrId)
+    },
+
+    toggleSequenceZikr(zikr) {
+      const idx = this.sequenceForm.zikrs.findIndex(z => z.id === zikr.id)
+      if (idx >= 0) {
+        this.sequenceForm.zikrs.splice(idx, 1)
+      } else {
+        this.sequenceForm.zikrs.push({
+          id: zikr.id,
+          arabic: zikr.arabic,
+          latin: zikr.latin,
+          reps: zikr.currentReps || zikr.defaultRepetitions
+        })
+      }
+    },
+
+    getTotalSeqReps(seq) {
+      return seq.zikrs.reduce((sum, z) => sum + (z.reps || 0), 0)
+    },
+
+    saveSequence() {
+      if (!this.sequenceForm.name || this.sequenceForm.zikrs.length === 0) return
+      this.sequences.push({
+        name: this.sequenceForm.name,
+        zikrs: [...this.sequenceForm.zikrs]
+      })
+      this.saveSequencesToStorage()
+      this.showSequenceModal = false
+      this.sequenceForm = { name: '', zikrs: [] }
+    },
+
+    deleteSequence(idx) {
+      this.sequences.splice(idx, 1)
+      this.saveSequencesToStorage()
+    },
+
+    startSequence(seq) {
+      // Start the first zikr in the sequence, pass the full sequence
+      if (seq.zikrs.length > 0) {
+        const first = seq.zikrs[0]
+        // Store the sequence in sessionStorage so ZikrCounter can use it
+        sessionStorage.setItem('activeSequence', JSON.stringify({
+          name: seq.name,
+          zikrs: seq.zikrs,
+          currentIndex: 0
+        }))
+        this.$router.push({
+          name: 'ZikrCounter',
+          params: { id: first.id },
+          query: { repetitions: first.reps, sequence: '1' }
+        })
+      }
+    },
+
+    async saveCustomZikr() {
+      if (!this.customZikrForm.arabic || !this.customZikrForm.latin) return
+      
+      this.savingCustomZikr = true
+      try {
+        const identifier = 'custom_' + this.customZikrForm.latin.toLowerCase().replace(/[^a-z0-9]+/g, '_')
+        const response = await fetch('/api/zikrs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...this.getAuthHeaders()
+          },
+          body: JSON.stringify({
+            arabic: this.customZikrForm.arabic,
+            latin: this.customZikrForm.latin,
+            identifier,
+            defaultRepetitions: this.customZikrForm.defaultRepetitions || 33,
+            isCustom: true
+          })
+        })
+        const data = await response.json()
+        if (data.success) {
+          this.showCustomZikrModal = false
+          this.customZikrForm = { arabic: '', latin: '', defaultRepetitions: 33 }
+          await this.loadZikrs()
+        } else {
+          alert(data.message || 'Failed to save custom zikr')
+        }
+      } catch (error) {
+        console.error('Error saving custom zikr:', error)
+        alert('Failed to save custom zikr')
+      } finally {
+        this.savingCustomZikr = false
+      }
     }
   }
 }
@@ -415,7 +651,7 @@ export default {
 }
 
 .app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   color: white;
   padding: 20px;
   display: flex;
@@ -547,7 +783,7 @@ export default {
 .stat-number {
   font-size: 2rem;
   font-weight: bold;
-  color: #667eea;
+  color: #16a34a;
 }
 
 .stat-label {
@@ -572,7 +808,7 @@ export default {
   padding: 25px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #16a34a;
 }
 
 .zikr-card:hover {
@@ -666,7 +902,7 @@ export default {
 }
 
 .start-btn {
-  background: #667eea;
+  background: #16a34a;
   color: white;
   border: none;
   padding: 12px 25px;
@@ -755,14 +991,181 @@ export default {
 }
 
 .pagination-number.active {
-  background: #667eea;
+  background: #16a34a;
   color: white;
-  border-color: #667eea;
+  border-color: #16a34a;
 }
 
 .pagination-number.active:hover {
   background: #5a6fd8;
   border-color: #5a6fd8;
+}
+
+/* Sequences */
+.sequences-section {
+  margin-bottom: 20px;
+}
+
+.sequences-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sequences-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.empty-sequences p {
+  color: #999;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.sequence-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sequence-card {
+  background: white;
+  border-radius: 12px;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-left: 3px solid #16a34a;
+}
+
+.sequence-info h3 {
+  margin: 0 0 4px 0;
+  color: #333;
+  font-size: 1.05rem;
+}
+
+.sequence-info p {
+  margin: 0;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.sequence-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.start-seq-btn {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.start-seq-btn:hover {
+  background: #15803d;
+}
+
+.delete-seq-btn {
+  background: none;
+  border: 1px solid #ddd;
+  color: #999;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-seq-btn:hover {
+  background: #fee;
+  color: #c33;
+  border-color: #fcc;
+}
+
+/* Sequence Modal extras */
+.zikr-picker {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+}
+
+.zikr-pick-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f5f5f5;
+  transition: background 0.15s;
+}
+
+.zikr-pick-item:hover {
+  background: #f9f9f9;
+}
+
+.zikr-pick-item.selected {
+  background: #f0fdf4;
+}
+
+.pick-check {
+  width: 20px;
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.pick-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.pick-arabic {
+  font-size: 0.85rem;
+  color: #888;
+  direction: rtl;
+}
+
+.selected-sequence-zikrs {
+  margin-top: 10px;
+}
+
+.selected-sequence-zikrs label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.seq-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.seq-reps-input {
+  width: 60px;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {
@@ -799,5 +1202,168 @@ export default {
     min-width: 40px;
     font-size: 14px;
   }
+}
+
+/* Custom Zikr */
+.zikr-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.zikr-list-header h2 {
+  margin: 0;
+}
+
+.add-custom-btn {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.add-custom-btn:hover {
+  background: #15803d;
+  transform: translateY(-1px);
+}
+
+.custom-badge {
+  display: inline-block;
+  background: #16a34a;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.zikr-card.custom {
+  border-left: 3px solid #16a34a;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.custom-zikr-modal {
+  background: white;
+  border-radius: 15px;
+  max-width: 450px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.custom-zikr-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.custom-zikr-modal .modal-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-modal-btn:hover {
+  background: #f5f5f5;
+}
+
+.custom-zikr-form {
+  padding: 25px;
+}
+
+.custom-zikr-form .form-group {
+  margin-bottom: 18px;
+}
+
+.custom-zikr-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #333;
+}
+
+.custom-zikr-form input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.custom-zikr-form input:focus {
+  outline: none;
+  border-color: #16a34a;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.save-custom-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-custom-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  flex: 1;
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background: #eee;
 }
 </style>

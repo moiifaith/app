@@ -1,0 +1,11 @@
+- More then one nested translations
+- Translations missing or untranslated
+- Translation caching
+- Translation selector dont work always in all places
+- Unknown Zikrs
+- Managing Users (add,edit,delete,block)
+- User adding his own zikrs
+- Zikrs sequences
+- Zikr transation while registering
+- cleaning local storage on logout
+- managing languges and loading the from the db

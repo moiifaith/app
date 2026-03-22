@@ -1,6 +1,17 @@
 import { createI18n } from 'vue-i18n'
 import { Preferences } from '@capacitor/preferences'
 
+// Import local fallback translations
+import en from './locales/en.json'
+import ar from './locales/ar.json'
+import es from './locales/es.json'
+import fr from './locales/fr.json'
+import bs from './locales/bs.json'
+import hr from './locales/hr.json'
+import sr from './locales/sr.json'
+
+const localMessages = { en, ar, es, fr, bs, hr, sr }
+
 // Get the browser language or fallback to 'en'
 async function getDefaultLocale() {
   // Try to get saved language from Capacitor Preferences
@@ -109,19 +120,19 @@ async function loadTranslations(locale) {
       
       // Fallback to cached translations if API fails
       const cachedTranslations = await getCachedTranslations(locale)
-      return cachedTranslations || {}
+      return cachedTranslations || localMessages[locale] || localMessages.en || {}
     }
   } catch (error) {
     console.error('Error fetching translations:', error)
     
     // Fallback to cached translations if API fails
     const cachedTranslations = await getCachedTranslations(locale)
-    return cachedTranslations || {}
+    return cachedTranslations || localMessages[locale] || localMessages.en || {}
   }
 }
 
-// Initialize with empty messages - will be loaded dynamically
-const messages = {}
+// Initialize with local messages as fallback
+const messages = { ...localMessages }
 
 const i18n = createI18n({
   legacy: false, // you must set `false`, to use Composition API

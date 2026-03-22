@@ -48,7 +48,15 @@
       <div v-if="isCompleted" class="completion-message">
         <h3>{{ $t('zikr.completionMessage') }}</h3>
         <p>{{ $t('zikr.completionDescription') }}</p>
+        <div v-if="activeSequence && hasNextInSequence" class="sequence-progress">
+          <p class="seq-progress-text">
+            {{ activeSequence.name }} — {{ activeSequence.currentIndex + 1 }}/{{ activeSequence.zikrs.length }}
+          </p>
+        </div>
         <div class="completion-actions">
+          <button v-if="activeSequence && hasNextInSequence" @click="goToNextInSequence" class="cta-btn next-seq-btn">
+            {{ $t('zikr.nextInSequence') || 'Next in Sequence' }} →
+          </button>
           <button @click="saveAndExit" class="cta-btn">
             {{ $t('zikr.saveProgress') }}
           </button>
@@ -69,6 +77,7 @@
 import { zikrData } from '../data/zikrs'
 import { zikrDescriptions } from '../data/zikrDescriptions'
 import { useModal } from '@/composables/useModal'
+import { getCurrentLanguage } from '@/i18n'
 
 export default {
   name: 'ZikrCounter',
@@ -83,7 +92,8 @@ export default {
       currentCount: 0,
       targetCount: 33,
       descriptions: {},
-      sessionStartTime: null
+      sessionStartTime: null,
+      activeSequence: null
     }
   },
   computed: {
@@ -92,6 +102,9 @@ export default {
     },
     isCompleted() {
       return this.currentCount >= this.targetCount
+    },
+    hasNextInSequence() {
+      return this.activeSequence && this.activeSequence.currentIndex < this.activeSequence.zikrs.length - 1
     }
   },
   mounted() {
@@ -139,7 +152,7 @@ export default {
       this.targetCount = parseInt(this.$route.query.repetitions) || this.currentZikr.defaultRepetitions
 
       // Load descriptions
-      const currentLanguage = localStorage.getItem('selectedLanguage') || 'en'
+      const currentLanguage = getCurrentLanguage() || 'en'
       this.descriptions = zikrDescriptions[currentLanguage] || zikrDescriptions.en
 
       // Load any existing progress for today
@@ -152,6 +165,13 @@ export default {
       }
 
       this.sessionStartTime = new Date()
+
+      // Check for active sequence
+      if (this.$route.query.sequence) {
+        try {
+          this.activeSequence = JSON.parse(sessionStorage.getItem('activeSequence'))
+        } catch { this.activeSequence = null }
+      }
     },
 
     focusCounter() {
@@ -266,7 +286,28 @@ export default {
     },
 
     getZikrDescription(identifier) {
-      return this.descriptions[identifier] || ''
+      if (!identifier) return ''
+      return this.descriptions[identifier] || zikrDescriptions.en[identifier] || ''
+    },
+
+    goToNextInSequence() {
+      if (!this.activeSequence || !this.hasNextInSequence) return
+      
+      this.saveProgress()
+      
+      const nextIndex = this.activeSequence.currentIndex + 1
+      const nextZikr = this.activeSequence.zikrs[nextIndex]
+      
+      // Update the sequence state
+      this.activeSequence.currentIndex = nextIndex
+      sessionStorage.setItem('activeSequence', JSON.stringify(this.activeSequence))
+      
+      // Navigate to next zikr in sequence
+      this.$router.push({
+        name: 'ZikrCounter',
+        params: { id: nextZikr.id },
+        query: { repetitions: nextZikr.reps, sequence: '1' }
+      })
     }
   }
 }
@@ -275,7 +316,7 @@ export default {
 <style scoped>
 .zikr-counter {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   color: white;
   display: flex;
   flex-direction: column;
@@ -468,6 +509,24 @@ export default {
   display: flex;
   gap: 15px;
   justify-content: center;
+  flex-wrap: wrap;
+}
+
+.seq-progress-text {
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 5px 0 10px;
+}
+
+.next-seq-btn {
+  background: #16a34a !important;
+  animation: pulseGreen 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(22, 163, 74, 0); }
 }
 
 .cta-btn {

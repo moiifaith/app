@@ -97,7 +97,7 @@ export default {
 <style scoped>
 .admin-login {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,8 +156,8 @@ export default {
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 .error-message {
@@ -171,7 +171,7 @@ export default {
 
 .login-btn {
   width: 100%;
-  background: #667eea;
+  background: #16a34a;
   color: white;
   border: none;
   padding: 12px 20px;
@@ -201,7 +201,7 @@ export default {
 }
 
 .back-to-app {
-  color: #667eea;
+  color: #16a34a;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;

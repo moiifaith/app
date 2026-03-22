@@ -64,7 +64,13 @@
     "noAccount": "Don't have an account?",
     "backToApp": "Back to App",
     "logout": "Sign Out",
-    "profile": "Profile"
+    "profile": "Profile",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "dontHaveAccount": "Don't have an account?",
+    "registerNow": "Register now",
+    "loginNow": "Login now",
+    "selectLanguage": "Select Language"
   },
   "zikr": {
     "appName": "Zikr Counter",

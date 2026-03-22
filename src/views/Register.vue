@@ -77,6 +77,24 @@
           />
         </div>
 
+        <div class="form-group">
+          <label for="language">{{ $t('auth.selectLanguage') || 'Select Language' }}</label>
+          <select
+            id="language"
+            v-model="form.language"
+            :disabled="loading"
+            class="language-select"
+          >
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+            <option value="bs">Bosanski</option>
+            <option value="hr">Hrvatski</option>
+            <option value="sr">Srpski</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+          </select>
+        </div>
+
         <div class="form-group checkbox-group">
           <label class="checkbox-label">
             <input
@@ -114,6 +132,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { migrateLocalStorageData } from '@/utils/dataMigration'
+import { setLanguage, getCurrentLanguage } from '@/i18n'
 
 export default {
   name: 'UserRegister',
@@ -130,6 +149,7 @@ export default {
       confirmPassword: '',
       firstName: '',
       lastName: '',
+      language: getCurrentLanguage() || 'en',
       migrateData: true
     })
 
@@ -153,10 +173,14 @@ export default {
           username: form.username,
           password: form.password,
           firstName: form.firstName,
-          lastName: form.lastName
+          lastName: form.lastName,
+          language: form.language
         })
 
         if (result.success) {
+          // Apply selected language
+          await setLanguage(form.language)
+          
           // Migrate local storage data if requested
           if (form.migrateData) {
             await migrateLocalStorageData()
@@ -190,7 +214,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   padding: 20px;
 }
 
@@ -249,12 +273,30 @@ export default {
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #16a34a;
 }
 
 .form-group input:disabled {
   background-color: #f5f5f5;
   cursor: not-allowed;
+}
+
+.language-select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+  background-color: white;
+  color: #333;
+  appearance: auto;
+}
+
+.language-select:focus {
+  outline: none;
+  border-color: #16a34a;
 }
 
 .checkbox-group {
@@ -284,8 +326,8 @@ export default {
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark {
-  background-color: #667eea;
-  border-color: #667eea;
+  background-color: #16a34a;
+  border-color: #16a34a;
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
@@ -311,7 +353,7 @@ export default {
 }
 
 .register-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16a34a 100%);
   color: white;
   border: none;
   padding: 15px;
@@ -328,7 +370,7 @@ export default {
 
 .register-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 20px rgba(22, 163, 74, 0.3);
 }
 
 .register-btn:disabled {
@@ -365,7 +407,7 @@ export default {
 }
 
 .auth-links a {
-  color: #667eea;
+  color: #16a34a;
   text-decoration: none;
   font-weight: 500;
 }

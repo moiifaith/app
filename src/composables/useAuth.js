@@ -142,6 +142,16 @@ export function useAuth() {
     // Clear stored data
     await Preferences.remove({ key: 'auth_token' })
     await Preferences.remove({ key: 'user_data' })
+
+    // Clear localStorage data
+    localStorage.removeItem('selectedLanguage')
+    localStorage.removeItem('zikrProgress')
+    localStorage.removeItem('todayZikrProgress')
+    localStorage.removeItem('zikrSessions')
+    localStorage.removeItem('zikrRepetitions')
+    localStorage.removeItem('adminToken')
+    localStorage.removeItem('adminUser')
+    localStorage.removeItem('zikrSequences')
   }
 
   const getAuthHeaders = () => {
