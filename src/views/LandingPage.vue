@@ -14,7 +14,10 @@
           </div>
         </router-link>
         <div class="nav-links">
-          <router-link to="/zikrs" class="nav-link app-link">Open App</router-link>
+          <button @click="toggleTheme" class="theme-toggle-btn" :title="isDark ? 'Light Mode' : 'Dark Mode'">
+            {{ isDark ? '☀️' : '🌙' }}
+          </button>
+          <router-link to="/zikrs" class="nav-link app-link">{{ $t('zikr.openApp') }}</router-link>
           <router-link to="/login" class="nav-link">{{ $t('auth.login.button') }}</router-link>
           <router-link to="/register" class="nav-link">{{ $t('auth.register.button') }}</router-link>
           <div class="language-selector">
@@ -22,7 +25,7 @@
               :options="languageOptions"
               v-model="currentLanguage"
               theme="landing"
-              placeholder="Language"
+              :placeholder="$t('language.current')"
             />
           </div>
         </div>
@@ -49,7 +52,23 @@
         </div>
       </div>
       <div class="hero-image">
-        <img src="../assets/zikr-hero-placeholder.png" alt="Zikr App Preview" />
+        <div class="hero-phone-mockup">
+          <div class="phone-screen">
+            <div class="mock-header">
+              <span class="mock-logo">📿</span>
+              <span class="mock-title">Zikr Counter</span>
+            </div>
+            <div class="mock-counter">
+              <div class="mock-circle">
+                <span class="mock-count">33</span>
+              </div>
+              <span class="mock-label">سُبْحَانَ اللَّهِ</span>
+            </div>
+            <div class="mock-progress">
+              <div class="mock-bar"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -88,15 +107,36 @@
         <h2>{{ $t('zikr.screenshotsTitle') }}</h2>
         <div class="screenshots-grid">
           <div class="screenshot">
-            <img src="../assets/screenshot-1-placeholder.png" alt="Zikr List" />
+            <div class="screenshot-card">
+              <div class="screenshot-icon">📿</div>
+              <div class="screenshot-lines">
+                <div class="line long"></div>
+                <div class="line short"></div>
+                <div class="line medium"></div>
+              </div>
+            </div>
             <p>{{ $t('zikr.screenshot1Caption') }}</p>
           </div>
           <div class="screenshot">
-            <img src="../assets/screenshot-2-placeholder.png" alt="Zikr Counter" />
+            <div class="screenshot-card">
+              <div class="screenshot-icon">🔢</div>
+              <div class="screenshot-counter-mock">
+                <div class="counter-ring"></div>
+              </div>
+            </div>
             <p>{{ $t('zikr.screenshot2Caption') }}</p>
           </div>
           <div class="screenshot">
-            <img src="../assets/screenshot-3-placeholder.png" alt="Zikr History" />
+            <div class="screenshot-card">
+              <div class="screenshot-icon">📊</div>
+              <div class="screenshot-bars">
+                <div class="bar" style="height: 40%"></div>
+                <div class="bar" style="height: 70%"></div>
+                <div class="bar" style="height: 55%"></div>
+                <div class="bar" style="height: 90%"></div>
+                <div class="bar" style="height: 65%"></div>
+              </div>
+            </div>
             <p>{{ $t('zikr.screenshot3Caption') }}</p>
           </div>
         </div>
@@ -126,6 +166,7 @@
 
 <script>
 import { useAuth } from '@/composables/useAuth'
+import { useTheme } from '@/composables/useTheme'
 import CustomSelect from '@/components/CustomSelect.vue'
 import { setLanguage, getCurrentLanguage } from '@/i18n'
 
@@ -136,9 +177,12 @@ export default {
   },
   setup() {
     const { isAuthenticated } = useAuth()
+    const { isDark, toggleTheme } = useTheme()
     
     return {
-      isAuthenticated
+      isAuthenticated,
+      isDark,
+      toggleTheme
     }
   },
   data() {
@@ -236,6 +280,22 @@ export default {
   align-items: center;
 }
 
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  line-height: 1;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
 .language-selector {
   margin-right: 0.5rem;
 }
@@ -256,7 +316,7 @@ export default {
 
 .nav-link:hover {
   background: white;
-  color: #5a6fd8;
+  color: #15803d;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
@@ -269,7 +329,7 @@ export default {
 }
 
 .app-link:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4c93 100%) !important;
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%) !important;
   color: white !important;
   box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
 }
@@ -315,12 +375,91 @@ export default {
   padding-left: 40px;
 }
 
-.hero-image img {
-  max-width: 400px;
-  width: 100%;
-  height: auto;
+/* Hero Phone Mockup */
+.hero-phone-mockup {
+  width: 280px;
+  margin: 0 auto;
+  background: #1a1a2e;
+  border-radius: 30px;
+  padding: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.phone-screen {
+  background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
   border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  padding: 20px 16px;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mock-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.mock-logo {
+  font-size: 1.5rem;
+}
+
+.mock-title {
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.mock-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.mock-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(22, 163, 74, 0.4);
+  margin-bottom: 16px;
+}
+
+.mock-count {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.mock-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2rem;
+  direction: rtl;
+  margin-bottom: 20px;
+}
+
+.mock-progress {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mock-bar {
+  width: 65%;
+  height: 100%;
+  background: linear-gradient(90deg, #16a34a, #22c55e);
+  border-radius: 3px;
 }
 
 .hero-actions {
@@ -393,14 +532,14 @@ export default {
 /* Features Section */
 .features {
   padding: 80px 0;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
 }
 
 .features h2 {
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 60px;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .features-grid {
@@ -410,11 +549,11 @@ export default {
 }
 
 .feature-card {
-  background: white;
+  background: var(--bg-card);
   padding: 40px 30px;
   border-radius: 15px;
   text-align: center;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 20px var(--shadow);
   transition: transform 0.3s ease;
 }
 
@@ -430,24 +569,25 @@ export default {
 .feature-card h3 {
   font-size: 1.4rem;
   margin-bottom: 15px;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .feature-card p {
-  color: #6c757d;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
 /* Screenshots Section */
 .screenshots {
   padding: 80px 0;
+  background: var(--bg-primary);
 }
 
 .screenshots h2 {
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 60px;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .screenshots-grid {
@@ -460,17 +600,76 @@ export default {
   text-align: center;
 }
 
-.screenshot img {
+.screenshot-card {
   width: 100%;
-  max-width: 300px;
-  height: auto;
-  border-radius: 15px;
+  max-width: 260px;
+  height: 320px;
+  margin: 0 auto 20px;
+  background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.screenshot-icon {
+  font-size: 2.5rem;
   margin-bottom: 20px;
 }
 
+.screenshot-lines {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.screenshot-lines .line {
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(22, 163, 74, 0.3);
+}
+
+.screenshot-lines .line.long { width: 100%; }
+.screenshot-lines .line.short { width: 60%; }
+.screenshot-lines .line.medium { width: 80%; }
+
+.screenshot-counter-mock {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.counter-ring {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 6px solid #16a34a;
+  box-shadow: 0 0 20px rgba(22, 163, 74, 0.3);
+}
+
+.screenshot-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+  padding-top: 10px;
+}
+
+.screenshot-bars .bar {
+  flex: 1;
+  background: linear-gradient(180deg, #16a34a, #15803d);
+  border-radius: 4px 4px 0 0;
+  min-height: 20px;
+}
+
 .screenshot p {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-size: 1.1rem;
   font-weight: 500;
 }

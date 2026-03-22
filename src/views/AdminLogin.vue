@@ -184,7 +184,7 @@ export default {
 }
 
 .login-btn:hover:not(:disabled) {
-  background: #5a6fd8;
+  background: #15803d;
   transform: translateY(-1px);
 }
 
@@ -208,7 +208,7 @@ export default {
 }
 
 .back-to-app:hover {
-  color: #5a6fd8;
+  color: #15803d;
 }
 
 @media (max-width: 480px) {

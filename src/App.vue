@@ -28,6 +28,7 @@
 
 <script>
 import { useModal } from './composables/useModal'
+import { useTheme } from './composables/useTheme'
 import AppModal from './components/Modal.vue'
 import PageTransition from './components/PageTransition.vue'
 
@@ -39,17 +40,52 @@ export default {
   },
   setup() {
     const { modals } = useModal()
+    useTheme()
     return { modals }
   }
 }
 </script>
 
 <style>
+/* Light Mode (default) */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-primary: #2c3e50;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --accent: #16a34a;
+  --accent-hover: #15803d;
+  --accent-light: rgba(22, 163, 74, 0.1);
+  --header-bg: rgba(255, 255, 255, 0.95);
+  --shadow: rgba(0, 0, 0, 0.1);
+  --input-bg: #ffffff;
+  --input-border: #dee2e6;
+}
+
+/* Dark Mode */
+:root[data-theme="dark"] {
+  --bg-primary: #222222;
+  --bg-secondary: #1a1a1a;
+  --bg-card: #2a2a2a;
+  --text-primary: #e8e8e8;
+  --text-secondary: #a0a0a0;
+  --border-color: #3a3a3a;
+  --accent: #16a34a;
+  --accent-hover: #22c55e;
+  --accent-light: rgba(22, 163, 74, 0.15);
+  --header-bg: rgba(34, 34, 34, 0.95);
+  --shadow: rgba(0, 0, 0, 0.3);
+  --input-bg: #333333;
+  --input-border: #444444;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  color: var(--text-primary);
   min-height: 100vh;
 }
 
@@ -60,7 +96,8 @@ export default {
 }
 
 body {
-  background-color: #f8f9fa;
+  background-color: var(--bg-secondary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .main-content {

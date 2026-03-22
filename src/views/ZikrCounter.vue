@@ -55,7 +55,7 @@
         </div>
         <div class="completion-actions">
           <button v-if="activeSequence && hasNextInSequence" @click="goToNextInSequence" class="cta-btn next-seq-btn">
-            {{ $t('zikr.nextInSequence') || 'Next in Sequence' }} →
+            {{ $t('zikr.nextInSequence') }} →
           </button>
           <button @click="saveAndExit" class="cta-btn">
             {{ $t('zikr.saveProgress') }}
@@ -271,9 +271,9 @@ export default {
           this.$t('zikr.confirmExit'),
           { 
             type: 'warning', 
-            title: this.$t('zikr.exitConfirm') || 'Exit Confirmation',
-            confirmText: this.$t('zikr.saveAndExit') || 'Save & Exit',
-            cancelText: this.$t('zikr.cancel') || 'Cancel'
+            title: this.$t('zikr.exitConfirm'),
+            confirmText: this.$t('zikr.saveAndExit'),
+            cancelText: this.$t('zikr.cancel')
           }
         )
         

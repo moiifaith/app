@@ -961,7 +961,7 @@ export default {
 }
 
 .primary-btn:hover:not(:disabled) {
-  background: #5a6fd8;
+  background: #15803d;
   transform: translateY(-1px);
 }
 
