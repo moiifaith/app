@@ -471,6 +471,45 @@ export default {
       
       // Load saved sequences
       this.loadSequences()
+
+      // If authenticated, pull today's progress from server so completion badges
+      // reflect progress made on other devices
+      if (this.isAuthenticated) {
+        await this.syncTodayProgressFromServer()
+        this.updateTodayStats()
+      }
+    },
+
+    async syncTodayProgressFromServer() {
+      try {
+        const response = await fetch('/api/progress', { headers: { ...this.getAuthHeaders() } })
+        if (!response.ok) return
+        const data = await response.json()
+        if (!data.success) return
+
+        const todayISO = new Date().toISOString().split('T')[0]
+        const todayDateString = new Date().toDateString()
+        const todayProgress = JSON.parse(localStorage.getItem('todayZikrProgress') || '{}')
+
+        data.progress
+          .filter(p => p.date === todayISO)
+          .forEach(p => {
+            const existing = todayProgress[String(p.zikr_id)]
+            // Only overwrite if server count is higher (another device progressed more)
+            if (!existing || p.count > (existing.count || 0)) {
+              todayProgress[String(p.zikr_id)] = {
+                completed: !!p.completed,
+                count: p.count,
+                targetCount: p.target_count,
+                date: todayDateString
+              }
+            }
+          })
+
+        localStorage.setItem('todayZikrProgress', JSON.stringify(todayProgress))
+      } catch (_) {
+        // offline — local data already loaded
+      }
     },
 
     async loadZikrs() {

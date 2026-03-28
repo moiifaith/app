@@ -1,100 +1,66 @@
-import { Preferences } from '@capacitor/preferences'
 import { useAuth } from '@/composables/useAuth'
 
 const API_BASE = '/api'
+const MIGRATION_FLAG_KEY = 'zikrProgressMigrated'
 
-export async function migrateLocalStorageData() {
+/**
+ * On first login, push any existing localStorage progress to the server.
+ * Safe to call multiple times — skips immediately after the first successful run.
+ */
+export async function migrateLocalStorageToServer() {
   const { getAuthHeaders } = useAuth()
-  
+
+  // Already migrated on this device
+  if (localStorage.getItem(MIGRATION_FLAG_KEY)) return { success: true, skipped: true }
+
+  const zikrProgress = JSON.parse(localStorage.getItem('zikrProgress') || '{}')
+  const progressEntries = Object.values(zikrProgress)
+
+  if (progressEntries.length === 0) {
+    localStorage.setItem(MIGRATION_FLAG_KEY, '1')
+    return { success: true, skipped: true }
+  }
+
+  // Convert from { "id_DateString": { zikrId, count, targetCount, date, completed } }
+  // to the server format { zikrId, date (YYYY-MM-DD), count, targetCount, completed }
+  const progress = progressEntries
+    .map(entry => {
+      let dateISO
+      try {
+        dateISO = new Date(entry.date).toISOString().split('T')[0]
+      } catch (_) {
+        dateISO = new Date().toISOString().split('T')[0]
+      }
+      return {
+        zikrId: parseInt(entry.zikrId),
+        date: dateISO,
+        count: entry.count || 0,
+        targetCount: entry.targetCount || 33,
+        completed: !!entry.completed
+      }
+    })
+    .filter(e => !isNaN(e.zikrId) && e.count > 0)
+
+  if (progress.length === 0) {
+    localStorage.setItem(MIGRATION_FLAG_KEY, '1')
+    return { success: true, skipped: true }
+  }
+
   try {
-    // Get existing localStorage data
-    const { value: zikrCountsJson } = await Preferences.get({ key: 'zikrCounts' })
-    const { value: zikrHistoryJson } = await Preferences.get({ key: 'zikrHistory' })
-    const { value: selectedLanguage } = await Preferences.get({ key: 'selectedLanguage' })
-    
-    let zikrCounts = {}
-    let zikrHistory = []
-    
-    try {
-      if (zikrCountsJson) {
-        zikrCounts = JSON.parse(zikrCountsJson)
-      }
-      if (zikrHistoryJson) {
-        zikrHistory = JSON.parse(zikrHistoryJson)
-      }
-    } catch (error) {
-      console.error('Error parsing stored data:', error)
-    }
-
-    // Prepare migration data
-    const migrationData = {
-      zikrCounts,
-      zikrHistory,
-      language: selectedLanguage || 'en'
-    }
-
-    // Send to server
     const response = await fetch(`${API_BASE}/progress/migrate`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeaders()
-      },
-      body: JSON.stringify(migrationData)
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+      body: JSON.stringify({ progress })
     })
 
     if (response.ok) {
-      console.log('Data migration successful')
-      
-      // Optionally clear old data after successful migration
-      // await Preferences.remove({ key: 'zikrCounts' })
-      // await Preferences.remove({ key: 'zikrHistory' })
-      
+      localStorage.setItem(MIGRATION_FLAG_KEY, '1')
       return { success: true }
     } else {
-      console.error('Migration failed:', await response.text())
       return { success: false, error: 'Migration failed' }
     }
-  } catch (error) {
-    console.error('Migration error:', error)
-    return { success: false, error: 'Migration error' }
-  }
-}
-
-export async function syncUserProgress() {
-  const { getAuthHeaders, isAuthenticated } = useAuth()
-  
-  if (!isAuthenticated.value) {
-    return { success: false, error: 'Not authenticated' }
-  }
-
-  try {
-    // Get user progress from server
-    const response = await fetch(`${API_BASE}/progress`, {
-      headers: getAuthHeaders()
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      
-      // Store synced data locally
-      await Preferences.set({
-        key: 'zikrCounts',
-        value: JSON.stringify(data.zikrCounts || {})
-      })
-      
-      await Preferences.set({
-        key: 'zikrHistory',
-        value: JSON.stringify(data.zikrHistory || [])
-      })
-
-      return { success: true, data }
-    } else {
-      return { success: false, error: 'Sync failed' }
-    }
-  } catch (error) {
-    console.error('Sync error:', error)
-    return { success: false, error: 'Sync error' }
+  } catch (_) {
+    return { success: false, error: 'Network error' }
   }
 }
 

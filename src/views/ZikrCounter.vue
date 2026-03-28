@@ -77,6 +77,7 @@
 import { zikrData } from '../data/zikrs'
 import { zikrDescriptions } from '../data/zikrDescriptions'
 import { useModal } from '@/composables/useModal'
+import { useAuth } from '@/composables/useAuth'
 import { getCurrentLanguage } from '@/i18n'
 
 export default {
@@ -84,7 +85,8 @@ export default {
   props: ['id'],
   setup() {
     const { showConfirm } = useModal()
-    return { showConfirm }
+    const { isAuthenticated, getAuthHeaders } = useAuth()
+    return { showConfirm, isAuthenticated, getAuthHeaders }
   },
   data() {
     return {
@@ -155,7 +157,7 @@ export default {
       const currentLanguage = getCurrentLanguage() || 'en'
       this.descriptions = zikrDescriptions[currentLanguage] || zikrDescriptions.en
 
-      // Load any existing progress for today
+      // Load any existing progress for today from localStorage
       const today = new Date().toDateString()
       const savedProgress = JSON.parse(localStorage.getItem('zikrProgress') || '{}')
       const todayKey = `${this.id}_${today}`
@@ -172,6 +174,56 @@ export default {
           this.activeSequence = JSON.parse(sessionStorage.getItem('activeSequence'))
         } catch { this.activeSequence = null }
       }
+
+      // If authenticated, load from server and use it if count is higher (cross-device sync)
+      if (this.isAuthenticated) {
+        this.syncProgressFromServer()
+      }
+    },
+
+    getTodayISO() {
+      return new Date().toISOString().split('T')[0]
+    },
+
+    async syncProgressFromServer() {
+      try {
+        const response = await fetch('/api/progress', { headers: { ...this.getAuthHeaders() } })
+        if (!response.ok) return
+        const data = await response.json()
+        if (!data.success) return
+
+        const todayISO = this.getTodayISO()
+        const serverEntry = data.progress.find(
+          p => String(p.zikr_id) === String(this.id) && p.date === todayISO
+        )
+        if (serverEntry && serverEntry.count > this.currentCount) {
+          this.currentCount = serverEntry.count
+          if (serverEntry.target_count) this.targetCount = serverEntry.target_count
+          // Keep localStorage in sync
+          this.saveLocalProgress()
+        }
+      } catch (_) {
+        // offline — localStorage already loaded
+      }
+    },
+
+    scheduleSyncToServer() {
+      clearTimeout(this._serverSaveTimer)
+      this._serverSaveTimer = setTimeout(() => this.doSyncToServer(), 1500)
+    },
+
+    doSyncToServer() {
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...this.getAuthHeaders() },
+        body: JSON.stringify({
+          zikrId: parseInt(this.id),
+          date: this.getTodayISO(),
+          count: this.currentCount,
+          targetCount: this.targetCount,
+          completed: this.currentCount >= this.targetCount
+        })
+      }).catch(() => {})
     },
 
     focusCounter() {
@@ -218,11 +270,10 @@ export default {
       this.targetCount += this.currentZikr.defaultRepetitions
     },
 
-    saveProgress() {
+    saveLocalProgress() {
       const today = new Date().toDateString()
       const todayKey = `${this.id}_${today}`
-      
-      // Save to detailed progress
+
       const savedProgress = JSON.parse(localStorage.getItem('zikrProgress') || '{}')
       savedProgress[todayKey] = {
         zikrId: this.id,
@@ -234,7 +285,6 @@ export default {
       }
       localStorage.setItem('zikrProgress', JSON.stringify(savedProgress))
 
-      // Save to today's summary
       const todayProgress = JSON.parse(localStorage.getItem('todayZikrProgress') || '{}')
       todayProgress[this.id] = {
         completed: this.currentCount >= this.targetCount,
@@ -245,9 +295,24 @@ export default {
       localStorage.setItem('todayZikrProgress', JSON.stringify(todayProgress))
     },
 
+    saveProgress() {
+      this.saveLocalProgress()
+
+      // Debounced server save for authenticated users
+      if (this.isAuthenticated) {
+        this.scheduleSyncToServer()
+      }
+    },
+
     saveAndExit() {
       this.saveProgress()
-      
+
+      // Flush server save immediately on exit (skip the debounce)
+      if (this.isAuthenticated) {
+        clearTimeout(this._serverSaveTimer)
+        this.doSyncToServer()
+      }
+
       // Save session summary
       const sessionData = {
         zikrId: this.id,

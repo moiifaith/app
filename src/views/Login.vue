@@ -61,6 +61,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '@/composables/useAuth'
+import { migrateLocalStorageToServer } from '@/utils/dataMigration'
 
 export default {
   name: 'UserLogin',
@@ -87,6 +88,8 @@ export default {
         })
 
         if (result.success) {
+          // Migrate any existing local-only progress to the server (runs once per device)
+          migrateLocalStorageToServer().catch(() => {})
           router.push('/zikr-app')
         } else {
           error.value = result.error || t('auth.loginFailed')

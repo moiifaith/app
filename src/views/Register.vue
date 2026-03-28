@@ -132,7 +132,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '@/composables/useAuth'
-import { migrateLocalStorageData } from '@/utils/dataMigration'
+import { migrateLocalStorageToServer } from '@/utils/dataMigration'
 import { setLanguage, getCurrentLanguage } from '@/i18n'
 
 export default {
@@ -185,7 +185,7 @@ export default {
           
           // Migrate local storage data if requested
           if (form.migrateData) {
-            await migrateLocalStorageData()
+            migrateLocalStorageToServer().catch(() => {})
           }
           
           router.push('/zikr-app')
