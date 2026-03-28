@@ -299,6 +299,7 @@
   "common": {
     "confirm": "Confirmer",
     "cancel": "Annuler",
-    "ok": "OK"
+    "ok": "OK",
+    "syncing": "Synchronisation"
   }
 }

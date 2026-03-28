@@ -275,7 +275,7 @@
     "maghribTime": "Evening",
     "ishaTime": "Night",
     "prayed": "Prayed",
-    "kaza": "Made Up",
+    "kaza": "Qad\u0101'",
     "missed": "Missed",
     "status": "Status",
     "today": "Today",
@@ -301,6 +301,7 @@
   "common": {
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "ok": "OK"
+    "ok": "OK",
+    "syncing": "Syncing"
   }
 }

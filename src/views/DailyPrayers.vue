@@ -5,6 +5,7 @@
       <div class="header-center">
         <h1>{{ $t('prayer.dailyPrayers') }}</h1>
         <p class="header-date">{{ formattedDate }}</p>
+        <span v-if="syncing" class="sync-indicator">↑ {{ $t('common.syncing') }}</span>
       </div>
       <button @click="goToHistory" class="history-btn">{{ $t('prayer.viewHistory') }}</button>
     </header>
@@ -97,6 +98,8 @@
 </template>
 
 <script>
+import { useAuth } from '@/composables/useAuth'
+
 const PRAYER_IDS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']
 const PRAYER_ARABIC = {
   fajr: 'الفجر',
@@ -108,6 +111,10 @@ const PRAYER_ARABIC = {
 
 export default {
   name: 'DailyPrayers',
+  setup() {
+    const { isAuthenticated, token } = useAuth()
+    return { isAuthenticated, token }
+  },
   data() {
     return {
       prayers: PRAYER_IDS.map(id => ({ id, arabic: PRAYER_ARABIC[id] })),
@@ -117,7 +124,8 @@ export default {
         asr: null,
         maghrib: null,
         isha: null
-      }
+      },
+      syncing: false
     }
   },
   computed: {
@@ -146,9 +154,33 @@ export default {
     }
   },
   mounted() {
-    this.loadFromStorage()
+    this.loadData()
   },
   methods: {
+    async loadData() {
+      // Always load localStorage first for instant display
+      this.loadFromStorage()
+      // If logged in, fetch from API and merge (API is source of truth)
+      if (this.isAuthenticated && this.token) {
+        try {
+          const res = await fetch(`/api/prayers?date=${this.todayKey}`, {
+            headers: { Authorization: `Bearer ${this.token}` }
+          })
+          if (res.ok) {
+            const { data } = await res.json()
+            if (data) {
+              PRAYER_IDS.forEach(id => {
+                this.prayerStatus[id] = data[id] || null
+              })
+              // Keep localStorage in sync with API data
+              this.writeLocalStorage()
+            }
+          }
+        } catch (err) {
+          console.warn('Prayer API load failed, using localStorage:', err)
+        }
+      }
+    },
     loadFromStorage() {
       const all = JSON.parse(localStorage.getItem('prayerProgress') || '{}')
       const todayData = all[this.todayKey]
@@ -158,19 +190,33 @@ export default {
         })
       }
     },
-    setPrayerStatus(prayerId, status) {
-      // Toggle off if already selected
-      if (this.prayerStatus[prayerId] === status) {
-        this.prayerStatus[prayerId] = null
-      } else {
-        this.prayerStatus[prayerId] = status
-      }
-      this.saveToStorage()
-    },
-    saveToStorage() {
+    writeLocalStorage() {
       const all = JSON.parse(localStorage.getItem('prayerProgress') || '{}')
       all[this.todayKey] = { ...this.prayerStatus }
       localStorage.setItem('prayerProgress', JSON.stringify(all))
+    },
+    async setPrayerStatus(prayerId, status) {
+      // Toggle off if already selected
+      this.prayerStatus[prayerId] = this.prayerStatus[prayerId] === status ? null : status
+      this.writeLocalStorage()
+      // Sync to API for logged-in users
+      if (this.isAuthenticated && this.token) {
+        this.syncing = true
+        try {
+          await fetch('/api/prayers', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.token}`
+            },
+            body: JSON.stringify({ date: this.todayKey, ...this.prayerStatus })
+          })
+        } catch (err) {
+          console.warn('Prayer API save failed:', err)
+        } finally {
+          this.syncing = false
+        }
+      }
     },
     goBack() {
       this.$router.push('/zikrs')
@@ -213,6 +259,17 @@ export default {
   margin: 0;
   font-size: 0.85rem;
   opacity: 0.8;
+}
+
+.sync-indicator {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 .back-btn,

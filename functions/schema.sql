@@ -111,6 +111,22 @@ CREATE TABLE IF NOT EXISTS user_preferences (
   UNIQUE(user_id)
 );
 
+-- Daily prayer tracking (one row per user per day)
+CREATE TABLE IF NOT EXISTS user_prayer_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  date TEXT NOT NULL, -- YYYY-MM-DD
+  fajr TEXT CHECK (fajr IN ('prayed', 'kaza', 'missed')),
+  dhuhr TEXT CHECK (dhuhr IN ('prayed', 'kaza', 'missed')),
+  asr TEXT CHECK (asr IN ('prayed', 'kaza', 'missed')),
+  maghrib TEXT CHECK (maghrib IN ('prayed', 'kaza', 'missed')),
+  isha TEXT CHECK (isha IN ('prayed', 'kaza', 'missed')),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(user_id, date)
+);
+
 -- Insert supported languages (including new Balkan languages)
 INSERT OR IGNORE INTO languages (code, name, native_name, rtl) VALUES
 ('en', 'English', 'English', 0),

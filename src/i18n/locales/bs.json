@@ -301,6 +301,7 @@
   "common": {
     "confirm": "Potvrdi",
     "cancel": "Otkaži",
-    "ok": "U redu"
+    "ok": "U redu",
+    "syncing": "Sinkronizacija"
   }
 }

@@ -188,6 +188,8 @@
 </template>
 
 <script>
+import { useAuth } from '@/composables/useAuth'
+
 const PRAYER_IDS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']
 const PRAYER_ARABIC = {
   fajr: 'الفجر',
@@ -199,6 +201,10 @@ const PRAYER_ARABIC = {
 
 export default {
   name: 'PrayerHistory',
+  setup() {
+    const { isAuthenticated, token } = useAuth()
+    return { isAuthenticated, token }
+  },
   data() {
     return {
       prayers: PRAYER_IDS.map(id => ({ id, arabic: PRAYER_ARABIC[id] })),
@@ -228,9 +234,34 @@ export default {
       return JSON.parse(localStorage.getItem('prayerProgress') || '{}')
     },
 
-    loadTodayData() {
+    authHeaders() {
+      return { Authorization: `Bearer ${this.token}` }
+    },
+
+    applyDayData(all, isoDate, apiRow) {
+      // Merge API row into local progress map
+      if (apiRow) {
+        const entry = {}
+        PRAYER_IDS.forEach(id => { entry[id] = apiRow[id] || null })
+        all[isoDate] = entry
+      }
+    },
+
+    async loadTodayData() {
       const todayKey = new Date().toISOString().split('T')[0]
       const all = this.getAllProgress()
+
+      if (this.isAuthenticated && this.token) {
+        try {
+          const res = await fetch(`/api/prayers?date=${todayKey}`, { headers: this.authHeaders() })
+          if (res.ok) {
+            const { data } = await res.json()
+            this.applyDayData(all, todayKey, data)
+            localStorage.setItem('prayerProgress', JSON.stringify(all))
+          }
+        } catch { /* fall through to localStorage */ }
+      }
+
       this.todayData = all[todayKey] || {}
       const values = Object.values(this.todayData)
       this.todayStats = {
@@ -240,8 +271,20 @@ export default {
       }
     },
 
-    loadDailyData() {
+    async loadDailyData() {
       const all = this.getAllProgress()
+
+      if (this.isAuthenticated && this.token) {
+        try {
+          const res = await fetch(`/api/prayers?date=${this.selectedDate}`, { headers: this.authHeaders() })
+          if (res.ok) {
+            const { data } = await res.json()
+            this.applyDayData(all, this.selectedDate, data)
+            localStorage.setItem('prayerProgress', JSON.stringify(all))
+          }
+        } catch { /* fall through to localStorage */ }
+      }
+
       const data = all[this.selectedDate]
       if (data && Object.keys(data).length > 0) {
         this.selectedDateData = data
@@ -259,9 +302,23 @@ export default {
       }
     },
 
-    loadMonthlyData() {
+    async loadMonthlyData() {
       const [year, month] = this.selectedMonth.split('-')
       const all = this.getAllProgress()
+
+      if (this.isAuthenticated && this.token) {
+        try {
+          const res = await fetch(`/api/prayers?month=${this.selectedMonth}`, { headers: this.authHeaders() })
+          if (res.ok) {
+            const { data } = await res.json()
+            if (Array.isArray(data)) {
+              data.forEach(row => this.applyDayData(all, row.date, row))
+              localStorage.setItem('prayerProgress', JSON.stringify(all))
+            }
+          }
+        } catch { /* fall through to localStorage */ }
+      }
+
       const today = new Date()
       const lastDay = new Date(year, month, 0).getDate()
 
@@ -275,7 +332,7 @@ export default {
         const isoDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
         const currentDate = new Date(year, month - 1, day)
         const dayData = all[isoDate] || {}
-        const hasData = Object.keys(dayData).length > 0
+        const hasData = Object.keys(dayData).some(k => dayData[k])
 
         const prayedCount = Object.values(dayData).filter(s => s === 'prayed').length
         const kazaCount = Object.values(dayData).filter(s => s === 'kaza').length
