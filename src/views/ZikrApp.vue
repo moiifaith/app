@@ -32,6 +32,9 @@
         <button @click="showHistory" class="history-btn">
           {{ $t('zikr.history') }}
         </button>
+        <button @click="$router.push('/prayers')" class="history-btn prayers-nav-btn">
+          🕌 {{ $t('prayer.dailyPrayers') }}
+        </button>
         <button 
           v-if="isAuthenticated" 
           @click="handleLogout" 

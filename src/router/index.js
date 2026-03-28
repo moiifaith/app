@@ -43,6 +43,16 @@ const routes = [
     component: () => import(/* webpackChunkName: "history" */ '../views/ZikrHistory.vue')
   },
   {
+    path: '/prayers',
+    name: 'DailyPrayers',
+    component: () => import(/* webpackChunkName: "prayers" */ '../views/DailyPrayers.vue')
+  },
+  {
+    path: '/prayers/history',
+    name: 'PrayerHistory',
+    component: () => import(/* webpackChunkName: "prayers" */ '../views/PrayerHistory.vue')
+  },
+  {
     path: '/app/zikr/:id',
     redirect: to => `/zikrs/counter/${to.params.id}`
   },
