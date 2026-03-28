@@ -489,13 +489,33 @@ export default {
 
         const todayISO = new Date().toISOString().split('T')[0]
         const todayDateString = new Date().toDateString()
-        const todayProgress = JSON.parse(localStorage.getItem('todayZikrProgress') || '{}')
 
-        data.progress
-          .filter(p => p.date === todayISO)
-          .forEach(p => {
+        // todayZikrProgress — summary used by ZikrApp completion badges
+        const todayProgress = JSON.parse(localStorage.getItem('todayZikrProgress') || '{}')
+        // zikrProgress — detailed cache used by ZikrCounter to restore counts
+        const zikrProgress = JSON.parse(localStorage.getItem('zikrProgress') || '{}')
+
+        data.progress.forEach(p => {
+          const isToday = p.date === todayISO
+
+          // Always update the detailed cache for every date from the server
+          // so that opening any zikr counter restores the correct count
+          const detailKey = `${p.zikr_id}_${new Date(p.date).toDateString()}`
+          const existingDetail = zikrProgress[detailKey]
+          if (!existingDetail || p.count > (existingDetail.count || 0)) {
+            zikrProgress[detailKey] = {
+              zikrId: String(p.zikr_id),
+              count: p.count,
+              targetCount: p.target_count,
+              date: new Date(p.date).toDateString(),
+              lastUpdated: new Date().toISOString(),
+              completed: !!p.completed
+            }
+          }
+
+          // Update today's summary for completion badges
+          if (isToday) {
             const existing = todayProgress[String(p.zikr_id)]
-            // Only overwrite if server count is higher (another device progressed more)
             if (!existing || p.count > (existing.count || 0)) {
               todayProgress[String(p.zikr_id)] = {
                 completed: !!p.completed,
@@ -504,9 +524,11 @@ export default {
                 date: todayDateString
               }
             }
-          })
+          }
+        })
 
         localStorage.setItem('todayZikrProgress', JSON.stringify(todayProgress))
+        localStorage.setItem('zikrProgress', JSON.stringify(zikrProgress))
       } catch (_) {
         // offline — local data already loaded
       }
