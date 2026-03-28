@@ -321,6 +321,7 @@ export default {
   display: flex;
   flex-direction: column;
   outline: none;
+  touch-action: manipulation;
 }
 
 .counter-header {
@@ -440,6 +441,9 @@ export default {
   align-items: center;
   justify-content: center;
   text-align: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .main-counter:hover {
@@ -470,6 +474,7 @@ export default {
   cursor: pointer;
   font-weight: 500;
   transition: all 0.3s ease;
+  touch-action: manipulation;
 }
 
 .control-btn:hover:not(:disabled) {
